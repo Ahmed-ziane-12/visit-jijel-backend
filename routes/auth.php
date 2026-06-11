@@ -17,8 +17,7 @@ Route::post('reset-password', [AuthController::class, 'resetPassword'])
 
 // Email verification link (signed URL — Laravel generates this automatically)
 Route::get('verify-email/{id}/{hash}', [AuthController::class, 'verifyEmail'])
-    ->middleware(['signed', 'throttle:6,1'])
-    ->name('verification.verify');
+    ->middleware(['signed', 'throttle:6,1']);
 
 // ── Protected ─────────────────────────────────────────────────
 Route::middleware('auth:sanctum')->group(function () {
@@ -26,8 +25,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('me', [AuthController::class, 'me']);
 
     Route::post('email/verification-notification', [AuthController::class, 'sendVerificationEmail'])
-        ->middleware('throttle:6,1')
-        ->name('verification.send');
+        ->middleware('throttle:6,1');
 
     Route::put('password', [AuthController::class, 'updatePassword']);
     Route::put('profile', [AuthController::class, 'updateProfile']);
