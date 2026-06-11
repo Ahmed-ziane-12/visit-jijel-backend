@@ -38,14 +38,16 @@ COPY . .
 
 RUN php artisan route:cache && \
     php artisan view:cache && \
-    php artisan config:cache && \
     php artisan event:cache && \
     chown -R www-data:www-data storage bootstrap/cache && \
     chmod -R 775 storage bootstrap/cache
 
 COPY docker/nginx.conf /etc/nginx/http.d/default.conf
 COPY docker/supervisord.conf /etc/supervisord.conf
+COPY docker/start.sh /start.sh
+
+RUN chmod +x /start.sh
 
 EXPOSE 80
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
+CMD ["/start.sh"]
