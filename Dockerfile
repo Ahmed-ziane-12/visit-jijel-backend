@@ -16,6 +16,10 @@ RUN apk add --no-cache \
     supervisor \
     postgresql-dev \
     linux-headers \
+    autoconf \
+    gcc \
+    g++ \
+    make \
     && docker-php-ext-install -j$(nproc) \
         pdo_pgsql \
         pgsql \
