@@ -8,4 +8,3 @@
 /storage/framework/views/*
 /storage/logs/*
 !.gitignore
-docker/
