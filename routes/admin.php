@@ -20,11 +20,13 @@ Route::prefix('admin/v1')->group(function () {
         Route::delete('admins/{user}', [AuthController::class, 'deleteAdmin']);
 
         // Platform management
-        Route::apiResource('users', Admin\UserController::class);
-        Route::apiResource('businesses', Admin\BusinessController::class)->except(['store']);
-        Route::apiResource('destinations', Admin\DestinationController::class);
-        Route::apiResource('events', Admin\EventController::class)->except(['store']);
-        Route::apiResource('reviews', Admin\ReviewController::class)->except(['store']);
+        Route::name('admin.')->group(function () {
+            Route::apiResource('users', Admin\UserController::class);
+            Route::apiResource('businesses', Admin\BusinessController::class)->except(['store']);
+            Route::apiResource('destinations', Admin\DestinationController::class);
+            Route::apiResource('events', Admin\EventController::class)->except(['store']);
+            Route::apiResource('reviews', Admin\ReviewController::class)->except(['store']);
+        });
 
         // Dashboard stats
         Route::get('stats', [Admin\AdminStatsController::class, 'index']);
