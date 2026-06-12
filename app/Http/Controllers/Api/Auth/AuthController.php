@@ -30,16 +30,22 @@ class AuthController extends Controller
     {
         $user = $action->handle($request->validated());
 
+        $token = null;
+
         // Clients get a session immediately so they can use the app;
         // business owners must verify first, so they are not auto-logged in.
         if ($user->profile->role === 'client') {
             Auth::login($user);
             $request->session()->regenerate();
+
+            // Issue a Sanctum token so the frontend can skip cookie-based auth
+            $token = $user->createToken('auth-token')->plainTextToken;
         }
 
         return response()->json([
             'message' => 'Registration successful. Please verify your email.',
             'user' => $user->load('profile'),
+            'token' => $token,
         ], 201);
     }
 
@@ -87,6 +93,12 @@ class AuthController extends Controller
 
     public function logout(Request $request): JsonResponse
     {
+        // Revoke the current API token if the request was authenticated via Bearer token
+        if ($token = $request->user()?->currentAccessToken()) {
+            $token->delete();
+        }
+
+        // Clean up any lingering web session (used by cookie-based auth)
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();
