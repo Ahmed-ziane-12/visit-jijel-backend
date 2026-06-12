@@ -14,6 +14,17 @@ class BusinessController extends Controller
 {
     use AuthorizesRequests;
 
+    public function myBusinesses(Request $request): JsonResponse
+    {
+        $businesses = $request->user()->businesses()
+            ->with('media')
+            ->withCount('listings')
+            ->latest()
+            ->get();
+
+        return response()->json($businesses);
+    }
+
     public function index(Request $request): JsonResponse
     {
         $businesses = Business::query()

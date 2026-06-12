@@ -50,6 +50,7 @@ Route::prefix('v1')->group(function () {
         Route::delete('reviews/{review}', [Api\ReviewController::class, 'destroy']);
 
         // Businesses — owner only
+        Route::get('my-businesses', [Api\BusinessController::class, 'myBusinesses']);
         Route::apiResource('businesses', Api\BusinessController::class)->except(['index', 'show']);
         Route::apiResource('businesses.listings', Api\ListingController::class)->except(['index', 'show']);
 
