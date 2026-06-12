@@ -20,23 +20,27 @@ class UserSeeder extends Seeder
         ];
 
         foreach ($owners as $data) {
-            $user = User::create([
-                'name' => $data['name'],
-                'email' => $data['email'],
-                'password' => $password,
-                'email_verified_at' => now(),
-            ]);
+            $user = User::firstOrCreate(
+                ['email' => $data['email']],
+                [
+                    'name' => $data['name'],
+                    'password' => $password,
+                    'email_verified_at' => now(),
+                ]
+            );
 
-            $user->profile()->create([
-                'role' => 'business_owner',
-                'phone' => fake()->phoneNumber(),
-                'bio' => fake()->paragraph(),
-                'wilaya' => 'Jijel',
-                'commune' => fake()->randomElement([
-                    'Jijel Centre', 'El Aouana', 'Chekfa', 'Taher',
-                    'Djimla', 'Settara', 'El Milia', 'Kaous',
-                ]),
-            ]);
+            if ($user->wasRecentlyCreated) {
+                $user->profile()->create([
+                    'role' => 'business_owner',
+                    'phone' => fake()->phoneNumber(),
+                    'bio' => fake()->paragraph(),
+                    'wilaya' => 'Jijel',
+                    'commune' => fake()->randomElement([
+                        'Jijel Centre', 'El Aouana', 'Chekfa', 'Taher',
+                        'Djimla', 'Settara', 'El Milia', 'Kaous',
+                    ]),
+                ]);
+            }
         }
 
         // 7 clients
@@ -51,23 +55,27 @@ class UserSeeder extends Seeder
         ];
 
         foreach ($clients as $data) {
-            $user = User::create([
-                'name' => $data['name'],
-                'email' => $data['email'],
-                'password' => $password,
-                'email_verified_at' => now(),
-            ]);
+            $user = User::firstOrCreate(
+                ['email' => $data['email']],
+                [
+                    'name' => $data['name'],
+                    'password' => $password,
+                    'email_verified_at' => now(),
+                ]
+            );
 
-            $user->profile()->create([
-                'role' => 'client',
-                'phone' => fake()->phoneNumber(),
-                'bio' => fake()->sentence(),
-                'wilaya' => fake()->randomElement([
-                    'Jijel', 'Skikda', 'Mila', 'Constantine',
-                    'Béjaïa', 'Sétif', 'Bordj Bou Arréridj',
-                ]),
-                'commune' => fake()->city(),
-            ]);
+            if ($user->wasRecentlyCreated) {
+                $user->profile()->create([
+                    'role' => 'client',
+                    'phone' => fake()->phoneNumber(),
+                    'bio' => fake()->sentence(),
+                    'wilaya' => fake()->randomElement([
+                        'Jijel', 'Skikda', 'Mila', 'Constantine',
+                        'Béjaïa', 'Sétif', 'Bordj Bou Arréridj',
+                    ]),
+                    'commune' => fake()->city(),
+                ]);
+            }
         }
     }
 }

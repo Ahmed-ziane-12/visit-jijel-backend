@@ -17,6 +17,7 @@ return new class extends Migration
             $table->decimal('longitude', 10, 7)->nullable();
             $table->enum('category', ['nature', 'historical', 'beach', 'urban', 'cultural', 'sport']);
             $table->boolean('is_featured')->default(false);
+            $table->enum('state', ['active', 'inactive'])->default('active');
             $table->json('tags')->nullable();
             $table->timestamps();
         });

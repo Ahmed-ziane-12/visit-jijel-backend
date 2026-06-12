@@ -11,6 +11,7 @@ use App\Models\Media;
 use App\Models\Profile;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
 class CloudinaryController extends Controller
 {
@@ -105,56 +106,56 @@ class CloudinaryController extends Controller
     }
 
     /**
- * Delete a media record from both Cloudinary and the database.
- */
-public function delete(Request $request): JsonResponse
-{
-    $request->validate([
-        'media_id' => ['required', 'integer'],
-    ]);
+     * Delete a media record from both Cloudinary and the database.
+     */
+    public function delete(Request $request): JsonResponse
+    {
+        $request->validate([
+            'media_id' => ['required', 'integer'],
+        ]);
 
-    $media = Media::findOrFail($request->input('media_id'));
-    $publicId = $media->cloudinary_public_id;
+        $media = Media::findOrFail($request->input('media_id'));
+        $publicId = $media->cloudinary_public_id;
 
-    // Build the signed deletion request to Cloudinary
-    $timestamp  = time();
-    $apiKey     = config('cloudinary.api_key');
-    $apiSecret  = config('cloudinary.api_secret');
-    $cloudName  = config('cloudinary.cloud_name');
+        // Build the signed deletion request to Cloudinary
+        $timestamp = time();
+        $apiKey = config('cloudinary.api_key');
+        $apiSecret = config('cloudinary.api_secret');
+        $cloudName = config('cloudinary.cloud_name');
 
-    $params = [
-        'public_id' => $publicId,
-        'timestamp' => $timestamp,
-    ];
-
-    ksort($params);
-
-    $paramString = collect($params)
-        ->map(fn ($v, $k) => "{$k}={$v}")
-        ->implode('&');
-
-    $signature = hash('sha256', $paramString . $apiSecret);
-
-    // Call Cloudinary's destroy endpoint
-    $response = \Illuminate\Support\Facades\Http::asForm()->post(
-        "https://api.cloudinary.com/v1_1/{$cloudName}/image/destroy",
-        [
+        $params = [
             'public_id' => $publicId,
-            'signature' => $signature,
-            'api_key'   => $apiKey,
             'timestamp' => $timestamp,
-        ]
-    );
+        ];
 
-    if ($response->failed() || ($response->json('result') !== 'ok')) {
-        return response()->json([
-            'message' => 'Failed to delete from Cloudinary.',
-            'cloudinary' => $response->json(),
-        ], 502);
+        ksort($params);
+
+        $paramString = collect($params)
+            ->map(fn ($v, $k) => "{$k}={$v}")
+            ->implode('&');
+
+        $signature = hash('sha256', $paramString.$apiSecret);
+
+        // Call Cloudinary's destroy endpoint
+        $response = Http::asForm()->post(
+            "https://api.cloudinary.com/v1_1/{$cloudName}/image/destroy",
+            [
+                'public_id' => $publicId,
+                'signature' => $signature,
+                'api_key' => $apiKey,
+                'timestamp' => $timestamp,
+            ]
+        );
+
+        if ($response->failed() || ($response->json('result') !== 'ok')) {
+            return response()->json([
+                'message' => 'Failed to delete from Cloudinary.',
+                'cloudinary' => $response->json(),
+            ], 502);
+        }
+
+        $media->delete();
+
+        return response()->json(['message' => 'Media deleted successfully.']);
     }
-
-    $media->delete();
-
-    return response()->json(['message' => 'Media deleted successfully.']);
-}
 }
