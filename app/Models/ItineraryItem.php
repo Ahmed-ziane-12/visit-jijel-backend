@@ -23,6 +23,18 @@ class ItineraryItem extends Model
         'item_type',
     ];
 
+    protected $appends = ['description', 'image_url'];
+
+    public function getDescriptionAttribute(): ?string
+    {
+        return $this->notes;
+    }
+
+    public function getImageUrlAttribute(): ?string
+    {
+        return $this->destination?->media?->first()?->secure_url;
+    }
+
     // ── Relationships ─────────────────────────────────────────
     public function day(): BelongsTo
     {
