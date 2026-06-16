@@ -32,19 +32,24 @@ class AuthController extends Controller
             return response()->json(['message' => 'Unauthorized.'], 403);
         }
 
+        $token = $user->createToken('admin-panel')->plainTextToken;
+
         return response()->json([
             'user' => $user,
             'is_super_admin' => $user->isSuperAdmin(),
             'must_reset_password' => $user->mustResetPassword(),
+            'token' => $token,
         ]);
     }
 
     // ── Logout ────────────────────────────────────────────────
     public function logout(Request $request): JsonResponse
     {
+        if ($token = $request->user()?->currentAccessToken()) {
+            $token->delete();
+        }
+
         Auth::guard('web')->logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
 
         return response()->json(['message' => 'Logged out successfully.']);
     }
