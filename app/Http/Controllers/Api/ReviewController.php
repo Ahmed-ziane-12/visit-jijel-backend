@@ -20,7 +20,7 @@ class ReviewController extends Controller
             ->when($request->listing_id, fn ($q) => $q->where('listing_id', $request->listing_id))
             ->when($request->destination_id, fn ($q) => $q->where('destination_id', $request->destination_id))
             ->when($request->event_id, fn ($q) => $q->where('event_id', $request->event_id))
-            ->with('user:id,name')
+            ->with('user.profile.media')
             ->orderByDesc('created_at')
             ->paginate(10);
 
