@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Route;
 
 // ── Breeze /api/user override ─────────────────────────────────
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user()->load('profile');
+    return $request->user()->load(['profile', 'profile.media']);
 });
 
 // ── Versioned API ─────────────────────────────────────────────

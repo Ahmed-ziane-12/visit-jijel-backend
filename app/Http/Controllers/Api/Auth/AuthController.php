@@ -44,7 +44,7 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Registration successful. Please verify your email.',
-            'user' => $user->load('profile'),
+            'user' => $user->load(['profile', 'profile.media']),
             'token' => $token,
         ], 201);
     }
@@ -61,7 +61,7 @@ class AuthController extends Controller
             ], 401);
         }
 
-        $user = Auth::user()->load('profile');
+        $user = Auth::user()->load(['profile', 'profile.media']);
         $role = $user->profile->role;
 
         // Business owners must verify before they can do anything
