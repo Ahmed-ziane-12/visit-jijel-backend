@@ -27,7 +27,7 @@ class DestinationController extends Controller
 
     public function show(Destination $destination): JsonResponse
     {
-        $destination->load(['media', 'reviews', 'events']);
+        $destination->load(['media', 'reviews.user', 'events']);
 
         return response()->json($destination);
     }
