@@ -24,7 +24,11 @@ class BusinessController extends Controller
 
     public function show(Business $business): JsonResponse
     {
-        $business->load(['owner:id,name', 'listings', 'events']);
+        $business->load([
+            'owner:id,name',
+            'media',
+            'listings' => fn ($q) => $q->published(),
+        ]);
 
         return response()->json($business);
     }
