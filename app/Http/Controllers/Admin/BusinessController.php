@@ -42,7 +42,32 @@ class BusinessController extends Controller
             'type' => ['sometimes', 'in:restaurant,touristic_agency,real_estate_agency,hotel'],
         ]);
 
+        $changes = collect();
+        $originalVerified = $business->is_verified;
+        $originalActive = $business->is_active;
+
+        if (array_key_exists('is_verified', $data) && $data['is_verified'] !== $originalVerified) {
+            $changes->push($data['is_verified'] ? 'verified' : 'unverified');
+        }
+
+        if (array_key_exists('is_active', $data) && $data['is_active'] !== $originalActive) {
+            $changes->push($data['is_active'] ? 'activated' : 'deactivated');
+        }
+
         $business->update($data);
+
+        if ($changes->isNotEmpty()) {
+            activity()
+                ->causedBy($request->user())
+                ->performedOn($business)
+                ->event($changes->first())
+                ->withProperties([
+                    'changes' => $data,
+                    'prev_is_verified' => $originalVerified,
+                    'prev_is_active' => $originalActive,
+                ])
+                ->log('Business '.$changes->implode(' and '));
+        }
 
         return response()->json($business);
     }

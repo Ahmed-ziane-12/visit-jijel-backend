@@ -31,5 +31,8 @@ Route::name('admin.')->prefix('admin/v1')->group(function () {
 
         // Cloudinary Stats
         Route::get('cloudinary/stats', CloudinaryStatsController::class);
+
+        // Activity Logs — super admin only (enforced in controller)
+        Route::get('activity-logs', [Admin\ActivityLogController::class, 'index']);
     });
 });
