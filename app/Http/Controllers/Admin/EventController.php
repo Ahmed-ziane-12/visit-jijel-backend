@@ -34,13 +34,31 @@ class EventController extends Controller
             'status' => ['required', 'in:draft,published,cancelled'],
         ]);
 
+        $original = $event->only('status');
         $event->update($data);
+
+        activity()
+            ->causedBy($request->user())
+            ->performedOn($event)
+            ->event($data['status'])
+            ->withProperties([
+                'before' => $original,
+                'after' => ['status' => $data['status']],
+            ])
+            ->log('Updated event');
 
         return response()->json($event);
     }
 
     public function destroy(Event $event): JsonResponse
     {
+        activity()
+            ->causedBy(request()->user())
+            ->performedOn($event)
+            ->event('deleted')
+            ->withProperties(['title' => $event->title])
+            ->log('Deleted event');
+
         $event->delete();
 
         return response()->json(['message' => 'Event deleted successfully.']);

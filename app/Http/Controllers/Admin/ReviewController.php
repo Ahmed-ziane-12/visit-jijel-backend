@@ -38,13 +38,31 @@ class ReviewController extends Controller
             'is_approved' => ['required', 'boolean'],
         ]);
 
+        $original = $review->only('is_approved');
         $review->update($data);
+
+        activity()
+            ->causedBy($request->user())
+            ->performedOn($review)
+            ->event($data['is_approved'] ? 'approved' : 'rejected')
+            ->withProperties([
+                'before' => $original,
+                'after' => ['is_approved' => $data['is_approved']],
+            ])
+            ->log('Updated review');
 
         return response()->json($review);
     }
 
     public function destroy(Review $review): JsonResponse
     {
+        activity()
+            ->causedBy(request()->user())
+            ->performedOn($review)
+            ->event('deleted')
+            ->withProperties(['id' => $review->id])
+            ->log('Deleted review');
+
         $review->delete();
 
         return response()->json(['message' => 'Review deleted successfully.']);

@@ -34,6 +34,11 @@ class AuthController extends Controller
 
         $token = $user->createToken('admin-panel')->plainTextToken;
 
+        activity()
+            ->causedBy($user)
+            ->event('login')
+            ->log('Logged in');
+
         return response()->json([
             'user' => $user,
             'is_super_admin' => $user->isSuperAdmin(),
@@ -45,9 +50,16 @@ class AuthController extends Controller
     // ── Logout ────────────────────────────────────────────────
     public function logout(Request $request): JsonResponse
     {
-        if ($token = $request->user()?->currentAccessToken()) {
+        $user = $request->user();
+
+        if ($token = $user?->currentAccessToken()) {
             $token->delete();
         }
+
+        activity()
+            ->causedBy($user)
+            ->event('logout')
+            ->log('Logged out');
 
         Auth::guard('web')->logout();
 
@@ -88,6 +100,13 @@ class AuthController extends Controller
             'created_by' => $request->user()->id,
         ]);
 
+        activity()
+            ->causedBy($request->user())
+            ->performedOn($admin)
+            ->event('created')
+            ->withProperties(['email' => $admin->email])
+            ->log('Created admin account');
+
         return response()->json([
             'message' => 'Admin account created.',
             'admin' => $admin,
@@ -108,6 +127,11 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
             'must_reset_password' => false,
         ]);
+
+        activity()
+            ->causedBy($user)
+            ->event('password_reset')
+            ->log('Reset password');
 
         return response()->json(['message' => 'Password updated successfully.']);
     }
@@ -136,6 +160,13 @@ class AuthController extends Controller
         if ($user->isSuperAdmin()) {
             return response()->json(['message' => 'Cannot delete a super admin.'], 422);
         }
+
+        activity()
+            ->causedBy($request->user())
+            ->performedOn($user)
+            ->event('deleted')
+            ->withProperties(['email' => $user->email])
+            ->log('Deleted admin account');
 
         $user->delete();
 

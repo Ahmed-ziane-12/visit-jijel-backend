@@ -72,8 +72,15 @@ class BusinessController extends Controller
         return response()->json($business);
     }
 
-    public function destroy(Business $business): JsonResponse
+    public function destroy(Request $request, Business $business): JsonResponse
     {
+        activity()
+            ->causedBy($request->user())
+            ->performedOn($business)
+            ->event('deleted')
+            ->withProperties(['name' => $business->name])
+            ->log('Deleted business');
+
         $business->delete();
 
         return response()->json(['message' => 'Business deleted successfully.']);

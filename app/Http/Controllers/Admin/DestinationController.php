@@ -36,18 +36,42 @@ class DestinationController extends Controller
     {
         $destination = Destination::create($request->validated());
 
+        activity()
+            ->causedBy($request->user())
+            ->performedOn($destination)
+            ->event('created')
+            ->log('Created destination');
+
         return response()->json($destination, 201);
     }
 
     public function update(UpdateDestinationRequest $request, Destination $destination): JsonResponse
     {
+        $original = $destination->only('name', 'category', 'is_featured');
         $destination->update($request->validated());
+
+        activity()
+            ->causedBy($request->user())
+            ->performedOn($destination)
+            ->event('updated')
+            ->withProperties([
+                'before' => $original,
+                'after' => $destination->only('name', 'category', 'is_featured'),
+            ])
+            ->log('Updated destination');
 
         return response()->json($destination);
     }
 
     public function destroy(Destination $destination): JsonResponse
     {
+        activity()
+            ->causedBy(request()->user())
+            ->performedOn($destination)
+            ->event('deleted')
+            ->withProperties(['name' => $destination->name])
+            ->log('Deleted destination');
+
         $destination->delete();
 
         return response()->json(['message' => 'Destination deleted successfully.']);

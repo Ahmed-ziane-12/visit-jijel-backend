@@ -53,6 +53,13 @@ class UserController extends Controller
             return $user;
         });
 
+        activity()
+            ->causedBy($request->user())
+            ->performedOn($user)
+            ->event('created')
+            ->withProperties(['email' => $user->email])
+            ->log('Created user');
+
         return response()->json($user->load('profile'), 201);
     }
 
@@ -66,6 +73,8 @@ class UserController extends Controller
             'commune' => ['sometimes', 'string'],
         ]);
 
+        $original = $user->only('name', 'email');
+
         DB::transaction(function () use ($user, $data) {
             $user->update(array_filter([
                 'name' => $data['name'] ?? null,
@@ -77,11 +86,28 @@ class UserController extends Controller
             }
         });
 
+        activity()
+            ->causedBy($request->user())
+            ->performedOn($user)
+            ->event('updated')
+            ->withProperties([
+                'before' => $original,
+                'after' => $user->only('name', 'email'),
+            ])
+            ->log('Updated user');
+
         return response()->json($user->fresh('profile'));
     }
 
-    public function destroy(User $user): JsonResponse
+    public function destroy(Request $request, User $user): JsonResponse
     {
+        activity()
+            ->causedBy($request->user())
+            ->performedOn($user)
+            ->event('deleted')
+            ->withProperties(['email' => $user->email])
+            ->log('Deleted user');
+
         $user->delete();
 
         return response()->json(['message' => 'User deleted successfully.']);
