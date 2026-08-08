@@ -20,8 +20,10 @@ return [
     'allowed_methods' => ['*'],
 
     'allowed_origins' => [
-        env('FRONTEND_URL', 'http://localhost:3000'),
-        env('ADMIN_URL', 'http://localhost:3001'),
+        env('FRONTEND_URL', 'https://visit-jijel.vercel.app'),
+        env('ADMIN_URL', 'https://visit-jijel-admin-panel.vercel.app'),
+        'http://localhost:3000',
+        'http://localhost:3001',
         'http://localhost:8081',
     ],
 
