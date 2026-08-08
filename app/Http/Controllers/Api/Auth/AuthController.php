@@ -19,6 +19,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
+use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
+use Laravel\Sanctum\TransientToken;
 
 class AuthController extends Controller
 {
@@ -30,17 +32,20 @@ class AuthController extends Controller
     {
         $user = $action->handle($request->validated());
 
-        $token = null;
+        $isFrontend = EnsureFrontendRequestsAreStateful::fromFrontend($request);
 
         // Clients get a session immediately so they can use the app;
         // business owners must verify first, so they are not auto-logged in.
-        if ($user->profile->role === 'client') {
+        if ($user->profile->role === 'client' && $isFrontend) {
             Auth::login($user);
             $request->session()->regenerate();
-
-            // Issue a Sanctum token so the frontend can skip cookie-based auth
-            $token = $user->createToken('auth-token')->plainTextToken;
         }
+
+        // Web apps authenticate with session cookies; only non-stateful
+        // clients (e.g. the mobile app) receive a bearer token.
+        $token = ! $isFrontend && $user->profile->role === 'client'
+            ? $user->createToken('auth-token')->plainTextToken
+            : null;
 
         return response()->json([
             'message' => 'Registration successful. Please verify your email.',
@@ -55,7 +60,9 @@ class AuthController extends Controller
 
     public function login(LoginRequest $request): JsonResponse
     {
-        if (! Auth::attempt($request->only('email', 'password'))) {
+        $isFrontend = EnsureFrontendRequestsAreStateful::fromFrontend($request);
+
+        if (! Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
             return response()->json([
                 'message' => 'Invalid credentials.',
             ], 401);
@@ -68,14 +75,24 @@ class AuthController extends Controller
         if ($role === 'business_owner' && ! $user->hasVerifiedEmail()) {
             Auth::logout();
 
+            if ($isFrontend) {
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+            }
+
             return response()->json([
                 'message' => 'You must verify your email before logging in.',
                 'email_unverified' => true,
             ], 403);
         }
 
-        // Issue a Sanctum token for mobile / API-token clients
-        $token = $user->createToken('mobile-app')->plainTextToken;
+        if ($isFrontend) {
+            $request->session()->regenerate();
+        }
+
+        // Web apps authenticate with session cookies; only non-stateful
+        // clients (e.g. the mobile app) receive a bearer token.
+        $token = $isFrontend ? null : $user->createToken('mobile-app')->plainTextToken;
 
         // Clients and admins log in freely
         // Next.js uses 'email_verified' to decide whether to show the alert
@@ -94,15 +111,19 @@ class AuthController extends Controller
     public function logout(Request $request): JsonResponse
     {
         // Revoke the current API token if the request was authenticated via Bearer token
-        if ($token = $request->user()?->currentAccessToken()) {
+        $token = $request->user()?->currentAccessToken();
+
+        if ($token && ! $token instanceof TransientToken) {
             $token->delete();
         }
 
         // Clean up any lingering web session (used by cookie-based auth)
         Auth::guard('web')->logout();
 
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        if ($request->hasSession()) {
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+        }
 
         return response()->json([
             'message' => 'Logged out successfully.',

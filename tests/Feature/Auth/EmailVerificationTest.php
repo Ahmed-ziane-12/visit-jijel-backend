@@ -16,11 +16,11 @@ test('email can be verified', function () {
         ['id' => $user->id, 'hash' => sha1($user->email)]
     );
 
-    $response = $this->actingAs($user)->get($verificationUrl);
+    $response = $this->get($verificationUrl);
 
     Event::assertDispatched(Verified::class);
     expect($user->fresh()->hasVerifiedEmail())->toBeTrue();
-    $response->assertRedirect(config('app.frontend_url').'/dashboard?verified=1');
+    $response->assertOk()->assertJson(['message' => 'Email verified successfully.']);
 });
 
 test('email is not verified with invalid hash', function () {
@@ -32,7 +32,7 @@ test('email is not verified with invalid hash', function () {
         ['id' => $user->id, 'hash' => sha1('wrong-email')]
     );
 
-    $this->actingAs($user)->get($verificationUrl);
+    $this->get($verificationUrl)->assertStatus(403);
 
     expect($user->fresh()->hasVerifiedEmail())->toBeFalse();
 });

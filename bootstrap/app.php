@@ -7,6 +7,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Routing\Middleware\SubstituteBindings;
+use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -21,7 +22,13 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Removed EnsureFrontendRequestsAreStateful — using token auth, not SPA cookies.
+        // The sanctum stateful middleware enables cookie/session auth (and CSRF
+        // protection) only for requests whose Origin/Referer matches the
+        // SANCTUM_STATEFUL_DOMAINS list, so the mobile bearer-token flow is
+        // unaffected.
+        $middleware->prepend(
+            EnsureFrontendRequestsAreStateful::class,
+        );
 
         $middleware->alias([
             'verified' => EnsureEmailIsVerified::class,

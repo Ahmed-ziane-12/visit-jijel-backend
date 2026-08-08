@@ -1,35 +1,57 @@
 <?php
 
+use App\Models\Profile;
 use App\Models\User;
 
-test('users can authenticate using the login screen', function () {
-    $user = User::factory()->create();
+function authStatefulHeaders(): array
+{
+    return ['Origin' => 'http://localhost:3000'];
+}
 
-    $response = $this->post('/login', [
+test('users can authenticate using the login screen', function () {
+    $user = User::factory()->has(Profile::factory()->client())->create();
+
+    $response = $this->withHeaders(authStatefulHeaders())->post('/api/v1/login', [
         'email' => $user->email,
         'password' => 'password',
     ]);
 
     $this->assertAuthenticated();
-    $response->assertNoContent();
+    $response->assertOk()->assertJson(['role' => 'client']);
 });
 
 test('users can not authenticate with invalid password', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->has(Profile::factory()->client())->create();
 
-    $this->post('/login', [
+    $this->withHeaders(authStatefulHeaders())->post('/api/v1/login', [
         'email' => $user->email,
         'password' => 'wrong-password',
-    ]);
+    ])->assertStatus(401);
+
+    $this->assertGuest();
+});
+
+test('business owners must verify their email before logging in', function () {
+    $user = User::factory()->unverified()->has(Profile::factory()->businessOwner())->create();
+
+    $this->withHeaders(authStatefulHeaders())->post('/api/v1/login', [
+        'email' => $user->email,
+        'password' => 'password',
+    ])->assertStatus(403)->assertJson(['email_unverified' => true]);
 
     $this->assertGuest();
 });
 
 test('users can logout', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->has(Profile::factory()->client())->create();
 
-    $response = $this->actingAs($user)->post('/logout');
+    $this->actingAs($user);
 
-    $this->assertGuest();
-    $response->assertNoContent();
+    $this->withHeaders(authStatefulHeaders())->post('/api/v1/logout')
+        ->assertOk()
+        ->assertJson(['message' => 'Logged out successfully.']);
+
+    // auth:sanctum switches the default guard to "sanctum" within a test,
+    // so assert against the web session guard directly.
+    $this->assertGuest('web');
 });

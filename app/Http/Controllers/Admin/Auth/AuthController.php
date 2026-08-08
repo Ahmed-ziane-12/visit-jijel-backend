@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
+use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
+use Laravel\Sanctum\TransientToken;
 
 class AuthController extends Controller
 {
@@ -20,7 +22,9 @@ class AuthController extends Controller
             'password' => ['required', 'string'],
         ]);
 
-        if (! Auth::attempt($request->only('email', 'password'))) {
+        $isFrontend = EnsureFrontendRequestsAreStateful::fromFrontend($request);
+
+        if (! Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
             return response()->json(['message' => 'Invalid credentials.'], 401);
         }
 
@@ -29,10 +33,21 @@ class AuthController extends Controller
         if (! $user->isAdmin()) {
             Auth::logout();
 
+            if ($isFrontend) {
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+            }
+
             return response()->json(['message' => 'Unauthorized.'], 403);
         }
 
-        $token = $user->createToken('admin-panel')->plainTextToken;
+        if ($isFrontend) {
+            $request->session()->regenerate();
+        }
+
+        // Web apps authenticate with session cookies; only non-stateful
+        // clients receive a bearer token.
+        $token = $isFrontend ? null : $user->createToken('admin-panel')->plainTextToken;
 
         activity()
             ->causedBy($user)
@@ -52,7 +67,9 @@ class AuthController extends Controller
     {
         $user = $request->user();
 
-        if ($token = $user?->currentAccessToken()) {
+        $token = $user?->currentAccessToken();
+
+        if ($token && ! $token instanceof TransientToken) {
             $token->delete();
         }
 
@@ -62,6 +79,11 @@ class AuthController extends Controller
             ->log('Logged out');
 
         Auth::guard('web')->logout();
+
+        if ($request->hasSession()) {
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+        }
 
         return response()->json(['message' => 'Logged out successfully.']);
     }
