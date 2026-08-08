@@ -33,6 +33,8 @@ class User extends Authenticatable implements MustVerifyEmail
 
     protected $with = ['profile'];
 
+    protected $appends = ['role'];
+
     protected function casts(): array
     {
         return [
@@ -58,6 +60,20 @@ class User extends Authenticatable implements MustVerifyEmail
     public function mustResetPassword(): bool
     {
         return $this->must_reset_password;
+    }
+
+    // ── Canonical role ────────────────────────────────────────
+    public function getRoleAttribute(): string
+    {
+        if ($this->is_super_admin) {
+            return 'super_admin';
+        }
+
+        if ($this->is_admin) {
+            return 'admin';
+        }
+
+        return $this->profile?->role ?? 'client';
     }
 
     // ── Role helpers (delegates to profile for clients/owners) ─

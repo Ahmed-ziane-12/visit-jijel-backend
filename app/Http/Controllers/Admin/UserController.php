@@ -15,7 +15,9 @@ class UserController extends Controller
     {
         $query = User::query()
             ->with('profile')
-            ->when($request->role, fn ($q) => $q->whereHas('profile', fn ($q) => $q->where('role', $request->role)))
+            ->when($request->role === 'super_admin', fn ($q) => $q->where('is_super_admin', true))
+            ->when($request->role === 'admin', fn ($q) => $q->where('is_admin', true)->where('is_super_admin', false))
+            ->when(in_array($request->role, ['business_owner', 'client'], true), fn ($q) => $q->whereHas('profile', fn ($q) => $q->where('role', $request->role)))
             ->when($request->search, fn ($q) => $q->where('name', 'like', "%{$request->search}%")
                 ->orWhere('email', 'like', "%{$request->search}%"))
             ->orderByDesc('created_at');
@@ -46,9 +48,10 @@ class UserController extends Controller
                 'name' => $data['name'],
                 'email' => $data['email'],
                 'password' => Hash::make($data['password']),
+                'is_admin' => true,
             ]);
 
-            $user->profile()->create(['role' => 'admin']);
+            $user->profile()->create();
 
             return $user;
         });
@@ -68,7 +71,7 @@ class UserController extends Controller
         $data = $request->validate([
             'name' => ['sometimes', 'string', 'max:100'],
             'email' => ['sometimes', 'email', 'unique:users,email,'.$user->id],
-            'role' => ['sometimes', 'in:admin,business_owner,client'],
+            'role' => ['sometimes', 'in:business_owner,client'],
             'wilaya' => ['sometimes', 'string'],
             'commune' => ['sometimes', 'string'],
         ]);

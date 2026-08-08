@@ -9,11 +9,6 @@ use Illuminate\Database\Eloquent\Builder;
  */
 trait HasRole
 {
-    public function isAdmin(): bool
-    {
-        return $this->role === 'admin';
-    }
-
     public function isBusinessOwner(): bool
     {
         return $this->role === 'business_owner';
@@ -27,11 +22,6 @@ trait HasRole
     public function hasRole(string $role): bool
     {
         return $this->role === $role;
-    }
-
-    public function scopeAdmins(Builder $query): Builder
-    {
-        return $query->where('role', 'admin');
     }
 
     public function scopeBusinessOwners(Builder $query): Builder

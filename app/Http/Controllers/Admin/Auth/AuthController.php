@@ -167,7 +167,7 @@ class AuthController extends Controller
 
         $admins = User::where('is_admin', '=', true, 'and')
             ->with('creator:id,name')
-            ->get(['id', 'name', 'email', 'is_super_admin', 'created_by', 'created_at']);
+            ->get(['id', 'name', 'email', 'is_admin', 'is_super_admin', 'created_by', 'created_at']);
 
         return response()->json($admins);
     }

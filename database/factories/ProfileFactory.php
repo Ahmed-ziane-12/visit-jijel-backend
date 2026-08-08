@@ -37,9 +37,4 @@ class ProfileFactory extends Factory
     {
         return $this->state(fn () => ['role' => 'business_owner']);
     }
-
-    public function admin(): static
-    {
-        return $this->state(fn () => ['role' => 'admin']);
-    }
 }
