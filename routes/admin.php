@@ -6,18 +6,20 @@ use App\Http\Controllers\Admin\CloudinaryStatsController;
 
 Route::name('admin.')->prefix('admin/v1')->group(function () {
 
-    Route::post('login', [AuthController::class, 'login']);
+    Route::post('login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 
-    Route::middleware('auth:sanctum')->group(function () {
+    Route::middleware(['auth:sanctum', 'admin'])->group(function () {
         Route::post('logout', [AuthController::class, 'logout']);
 
         // First login password reset — before anything else
-        Route::post('reset-password', [AuthController::class, 'resetPassword']);
+        Route::post('reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:5,1');
 
-        // Admin management — super admin only (enforced in controller)
-        Route::get('admins', [AuthController::class, 'listAdmins']);
-        Route::post('admins', [AuthController::class, 'createAdmin']);
-        Route::delete('admins/{user}', [AuthController::class, 'deleteAdmin']);
+        // Admin management — super admin only
+        Route::middleware('super_admin')->group(function () {
+            Route::get('admins', [AuthController::class, 'listAdmins']);
+            Route::post('admins', [AuthController::class, 'createAdmin']);
+            Route::delete('admins/{user}', [AuthController::class, 'deleteAdmin']);
+        });
 
         // Platform management
         Route::apiResource('users', Admin\UserController::class);
@@ -32,7 +34,7 @@ Route::name('admin.')->prefix('admin/v1')->group(function () {
         // Cloudinary Stats
         Route::get('cloudinary/stats', CloudinaryStatsController::class);
 
-        // Activity Logs — super admin only (enforced in controller)
-        Route::get('activity-logs', [Admin\ActivityLogController::class, 'index']);
+        // Activity Logs — super admin only
+        Route::middleware('super_admin')->get('activity-logs', [Admin\ActivityLogController::class, 'index']);
     });
 });

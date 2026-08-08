@@ -9,25 +9,36 @@ use App\Models\Event;
 use App\Models\Listing;
 use App\Models\Media;
 use App\Models\Profile;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Validation\Rule;
 
 class CloudinaryController extends Controller
 {
+    private const ALLOWED_FOLDERS = [
+        'jijel/businesses',
+        'jijel/listings',
+        'jijel/events',
+        'jijel/destinations',
+        'jijel/profiles',
+    ];
+
     /**
      * Step 1 — Next.js requests a signed upload signature.
      * This is short-lived (valid for 1 hour by default).
      */
     public function signature(Request $request): JsonResponse
     {
-        $request->validate([
-            'folder' => ['required', 'string'],  // e.g. "jijel/destinations"
+        $data = $request->validate([
+            'folder' => ['required', 'string', Rule::in(self::ALLOWED_FOLDERS)],
             'public_id' => ['nullable', 'string'],
         ]);
 
         $timestamp = time();
-        $folder = $request->input('folder');
+        $folder = $data['folder'];
         $cloudName = config('cloudinary.cloud_name');
         $apiKey = config('cloudinary.api_key');
         $apiSecret = config('cloudinary.api_secret');
@@ -96,6 +107,10 @@ class CloudinaryController extends Controller
         $modelClass = $modelMap[$data['model_type']];
         $model = $modelClass::findOrFail($data['model_id']);
 
+        if (! $this->canAttachMedia($request->user(), $data['model_type'], $model)) {
+            return response()->json(['message' => 'Unauthorized.'], 403);
+        }
+
         $media = $model->attachMedia(
             cloudinaryResponse: $data,
             collection: $data['collection'],
@@ -116,6 +131,10 @@ class CloudinaryController extends Controller
 
         $media = Media::findOrFail($request->input('media_id'));
         $publicId = $media->cloudinary_public_id;
+
+        if (! $this->canDeleteMedia($request->user(), $media)) {
+            return response()->json(['message' => 'Unauthorized.'], 403);
+        }
 
         // Build the signed deletion request to Cloudinary
         $timestamp = time();
@@ -157,5 +176,54 @@ class CloudinaryController extends Controller
         $media->delete();
 
         return response()->json(['message' => 'Media deleted successfully.']);
+    }
+
+    /**
+     * Verify the authenticated user owns the model they are attaching media to.
+     * Destinations are platform-managed (admins only).
+     */
+    private function canAttachMedia(User $user, string $modelType, Model $model): bool
+    {
+        if ($modelType === 'destination') {
+            return $user->isAdmin();
+        }
+
+        return match ($modelType) {
+            'business' => $user->id === $model->owner_id,
+            'listing' => $user->id === $model->business?->owner_id,
+            'event' => $user->id === $model->created_by,
+            'profile' => $user->id === $model->user_id,
+            default => false,
+        };
+    }
+
+    /**
+     * Verify the authenticated user owns the media's parent model.
+     */
+    private function canDeleteMedia(User $user, Media $media): bool
+    {
+        $model = $media->model;
+
+        if ($model instanceof Destination) {
+            return $user->isAdmin();
+        }
+
+        if ($model instanceof Business) {
+            return $user->id === $model->owner_id;
+        }
+
+        if ($model instanceof Listing) {
+            return $user->id === $model->business?->owner_id;
+        }
+
+        if ($model instanceof Event) {
+            return $user->id === $model->created_by;
+        }
+
+        if ($model instanceof Profile) {
+            return $user->id === $model->user_id;
+        }
+
+        return false;
     }
 }

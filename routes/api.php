@@ -15,10 +15,10 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::prefix('v1')->group(function () {
 
     // ── Auth — public ─────────────────────────────────────────
-    Route::post('register', [Api\Auth\AuthController::class, 'register']);
-    Route::post('login', [Api\Auth\AuthController::class, 'login']);
-    Route::post('forgot-password', [Api\Auth\AuthController::class, 'forgotPassword'])->middleware('guest');
-    Route::post('reset-password', [Api\Auth\AuthController::class, 'resetPassword'])->middleware('guest');
+    Route::post('register', [Api\Auth\AuthController::class, 'register'])->middleware('throttle:5,1');
+    Route::post('login', [Api\Auth\AuthController::class, 'login'])->middleware('throttle:5,1');
+    Route::post('forgot-password', [Api\Auth\AuthController::class, 'forgotPassword'])->middleware(['guest', 'throttle:5,1']);
+    Route::post('reset-password', [Api\Auth\AuthController::class, 'resetPassword'])->middleware(['guest', 'throttle:5,1']);
 
     Route::get('verify-email/{id}/{hash}', [Api\Auth\AuthController::class, 'verifyEmail'])
         ->middleware(['signed', 'throttle:6,1'])

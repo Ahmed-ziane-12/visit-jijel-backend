@@ -62,7 +62,7 @@ class AuthController extends Controller
         }
 
         $user = Auth::user()->load(['profile', 'profile.media']);
-        $role = $user->profile->role;
+        $role = $user->profile?->role;
 
         // Business owners must verify before they can do anything
         if ($role === 'business_owner' && ! $user->hasVerifiedEmail()) {

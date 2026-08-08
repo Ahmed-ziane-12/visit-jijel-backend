@@ -1,0 +1,140 @@
+<?php
+
+use App\Models\Business;
+use App\Models\Destination;
+use App\Models\Listing;
+use App\Models\Media;
+use App\Models\Profile;
+use App\Models\User;
+use Illuminate\Support\Facades\Http;
+use Laravel\Sanctum\Sanctum;
+
+function mediaOwner(): User
+{
+    return User::factory()->has(Profile::factory()->businessOwner())->create();
+}
+
+function mediaUser(): User
+{
+    return User::factory()->has(Profile::factory()->client())->create();
+}
+
+function mediaActingAs(User $user): User
+{
+    Sanctum::actingAs($user);
+
+    return $user;
+}
+
+function mediaPayload(int $modelId, string $modelType = 'business'): array
+{
+    return [
+        'model_type' => $modelType,
+        'model_id' => $modelId,
+        'collection' => 'gallery',
+        'cloudinary_public_id' => "jijel/{$modelType}s/test-{$modelId}",
+        'url' => 'https://res.cloudinary.com/test/image/upload/v1/test',
+        'secure_url' => 'https://res.cloudinary.com/test/image/upload/v1/test',
+        'format' => 'jpg',
+        'resource_type' => 'image',
+    ];
+}
+
+it('rejects non-whitelisted folders in the signature endpoint', function () {
+    mediaActingAs(mediaOwner());
+
+    $this->postJson('/api/v1/media/signature', ['folder' => 'jijel/malicious'])
+        ->assertStatus(422);
+});
+
+it('allows an owner to attach media to their own business', function () {
+    $owner = mediaActingAs(mediaOwner());
+    $business = Business::factory()->create(['owner_id' => $owner->id]);
+
+    $this->postJson('/api/v1/media/store', mediaPayload($business->id))
+        ->assertStatus(201)
+        ->assertJson(['model_id' => $business->id]);
+
+    $this->assertDatabaseHas('media', [
+        'model_type' => Business::class,
+        'model_id' => $business->id,
+    ]);
+});
+
+it('denies media attachment to someone elses business', function () {
+    $owner = mediaOwner();
+    $business = Business::factory()->create(['owner_id' => $owner->id]);
+
+    mediaActingAs(mediaUser());
+    $this->postJson('/api/v1/media/store', mediaPayload($business->id))
+        ->assertStatus(403);
+
+    $this->assertDatabaseCount('media', 0);
+});
+
+it('denies clients from attaching media to a destination', function () {
+    $destination = Destination::factory()->create();
+
+    mediaActingAs(mediaUser());
+    $this->postJson('/api/v1/media/store', mediaPayload($destination->id, 'destination'))
+        ->assertStatus(403);
+});
+
+it('allows admins to attach media to a destination', function () {
+    $destination = Destination::factory()->create();
+
+    mediaActingAs(User::factory()->create(['is_admin' => true]));
+    $this->postJson('/api/v1/media/store', mediaPayload($destination->id, 'destination'))
+        ->assertStatus(201);
+});
+
+it('allows an owner to delete media from their own business', function () {
+    Http::fake(['api.cloudinary.com/*' => Http::response(['result' => 'ok'])]);
+
+    $owner = mediaActingAs(mediaOwner());
+    $business = Business::factory()->create(['owner_id' => $owner->id]);
+    $media = Media::factory()->create([
+        'model_type' => Business::class,
+        'model_id' => $business->id,
+        'cloudinary_public_id' => 'jijel/businesses/test-1',
+    ]);
+
+    $this->deleteJson('/api/v1/media/delete', ['media_id' => $media->id])
+        ->assertStatus(200);
+
+    $this->assertDatabaseMissing('media', ['id' => $media->id]);
+});
+
+it('denies media deletion by a non-owner', function () {
+    $owner = mediaOwner();
+    $business = Business::factory()->create(['owner_id' => $owner->id]);
+    $media = Media::factory()->create([
+        'model_type' => Business::class,
+        'model_id' => $business->id,
+        'cloudinary_public_id' => 'jijel/businesses/test-1',
+    ]);
+
+    mediaActingAs(mediaUser());
+    $this->deleteJson('/api/v1/media/delete', ['media_id' => $media->id])
+        ->assertStatus(403);
+
+    $this->assertDatabaseHas('media', ['id' => $media->id]);
+});
+
+it('allows an owner to delete media from their own listing', function () {
+    Http::fake(['api.cloudinary.com/*' => Http::response(['result' => 'ok'])]);
+
+    $owner = mediaActingAs(mediaOwner());
+    $business = Business::factory()->create(['owner_id' => $owner->id]);
+    $listing = Listing::factory()->create(['business_id' => $business->id]);
+    $media = Media::factory()->create([
+        'model_type' => Listing::class,
+        'model_id' => $listing->id,
+        'cloudinary_public_id' => 'jijel/listings/test-1',
+    ]);
+
+    $this->deleteJson('/api/v1/media/delete', ['media_id' => $media->id])
+        ->assertStatus(200);
+
+    $this->assertDatabaseMissing('media', ['id' => $media->id]);
+});

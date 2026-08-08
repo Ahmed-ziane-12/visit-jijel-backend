@@ -60,6 +60,8 @@ class BusinessController extends Controller
 
     public function store(StoreBusinessRequest $request): JsonResponse
     {
+        $this->authorize('create', Business::class);
+
         $business = $request->user()->businesses()->create($request->validated());
 
         return response()->json($business->load('media'), 201);

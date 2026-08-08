@@ -44,6 +44,8 @@ class EventController extends Controller
 
     public function store(StoreEventRequest $request): JsonResponse
     {
+        $this->authorize('create', Event::class);
+
         $event = $request->user()->createdEvents()->create($request->validated());
 
         return response()->json($event->load('media'), 201);
