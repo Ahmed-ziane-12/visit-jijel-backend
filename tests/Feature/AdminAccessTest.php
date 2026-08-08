@@ -1,7 +1,17 @@
 <?php
 
+use App\Models\Profile;
 use App\Models\User;
 use Laravel\Sanctum\Sanctum;
+
+it('rejects a client bearer token on admin routes', function () {
+    $client = User::factory()->has(Profile::factory()->client())->create();
+    $token = $client->createToken('smoke')->plainTextToken;
+
+    $this->withToken($token)->getJson('/admin/v1/users')->assertStatus(403);
+
+    $this->withToken($token)->getJson('/admin/v1/businesses')->assertStatus(403);
+});
 
 it('blocks unauthenticated requests from admin routes', function () {
     $this->getJson('/admin/v1/users')
