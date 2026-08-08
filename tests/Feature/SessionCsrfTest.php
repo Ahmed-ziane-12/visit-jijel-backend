@@ -84,6 +84,36 @@ test('users without a profile can still log in', function () {
     $this->assertAuthenticated();
 });
 
+// ── Reload session persistence (Phase 2 fix) ──────────────────
+
+test('calling sanctum csrf-cookie after login does not destroy the session', function () {
+    $user = User::factory()->has(Profile::factory()->client())->create();
+
+    $csrf = $this->withHeaders(sessionHeaders())->get('/sanctum/csrf-cookie');
+
+    $this->withHeaders([
+        ...sessionHeaders(),
+        'X-XSRF-TOKEN' => $csrf->getCookie('XSRF-TOKEN', false),
+    ])->post('/api/v1/login', [
+        'email' => $user->email,
+        'password' => 'password',
+    ])->assertOk();
+
+    $sessionIdAfterLogin = session()->getId();
+    $this->assertAuthenticated();
+
+    // Re-calling csrf-cookie must not regenerate the session. Previously the
+    // globally-prepended stateful middleware double-started the session on this
+    // web-group route, so the fresh anonymous session logged the user out on
+    // the next page load.
+    $this->withHeaders(sessionHeaders())->get('/sanctum/csrf-cookie')->assertNoContent();
+
+    expect(session()->getId())->toBe($sessionIdAfterLogin);
+    $this->assertAuthenticated();
+
+    $this->withHeaders(sessionHeaders())->getJson('/api/user')->assertOk();
+});
+
 // ── Full session smoke flow ───────────────────────────────────
 
 test('full session flow: csrf-cookie, login, protected call, logout', function () {
