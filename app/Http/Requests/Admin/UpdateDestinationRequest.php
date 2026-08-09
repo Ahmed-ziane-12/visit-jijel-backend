@@ -15,11 +15,15 @@ class UpdateDestinationRequest extends FormRequest
     {
         return [
             'name' => ['sometimes', 'string', 'max:150'],
+            'arabic_name' => ['nullable', 'string', 'max:150'],
             'description' => ['nullable', 'string'],
+            'arabic_description' => ['nullable', 'string'],
             'address' => ['nullable', 'string'],
+            'arabic_address' => ['nullable', 'string'],
             'latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
             'category' => ['sometimes', 'in:nature,historical,beach,urban,cultural,sport'],
+            'arabic_category' => ['nullable', 'string', 'max:100'],
             'cover_image' => ['nullable', 'string', 'max:255'],
             'is_featured' => ['sometimes', 'boolean'],
             'tags' => ['nullable', 'array'],

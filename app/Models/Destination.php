@@ -16,11 +16,15 @@ class Destination extends Model
 
     protected $fillable = [
         'name',
+        'arabic_name',
         'description',
+        'arabic_description',
         'address',
+        'arabic_address',
         'latitude',
         'longitude',
         'category',
+        'arabic_category',
         'is_featured',
         'tags',
         'state',
