@@ -6,7 +6,7 @@ use App\Models\Listing;
 use App\Models\Media;
 use App\Models\Profile;
 use App\Models\User;
-use Illuminate\Support\Facades\Http;
+use App\Services\CloudinaryService;
 use Laravel\Sanctum\Sanctum;
 
 function mediaOwner(): User
@@ -45,6 +45,45 @@ it('rejects non-whitelisted folders in the signature endpoint', function () {
 
     $this->postJson('/api/v1/media/signature', ['folder' => 'jijel/malicious'])
         ->assertStatus(422);
+});
+
+it('signs and returns a transformation when one is provided', function () {
+    mediaActingAs(mediaOwner());
+
+    $this->postJson('/api/v1/media/signature', [
+        'folder' => 'jijel/destinations',
+        'transformation' => 'w_1600,c_limit,q_auto,f_auto',
+    ])
+        ->assertStatus(200)
+        ->assertJsonPath('transformation', 'w_1600,c_limit,q_auto,f_auto')
+        ->assertJsonStructure(['signature', 'timestamp', 'api_key', 'cloud_name']);
+});
+
+it('destroys cloudinary files when a destination is deleted', function () {
+    Sanctum::actingAs(User::factory()->create(['is_admin' => true]));
+
+    $destination = Destination::factory()->create();
+    Media::factory()->create([
+        'model_type' => Destination::class,
+        'model_id' => $destination->id,
+        'cloudinary_public_id' => 'jijel/destinations/dest-1',
+    ]);
+
+    $this->mock(CloudinaryService::class, function ($mock) {
+        $mock->shouldReceive('destroy')
+            ->once()
+            ->with('jijel/destinations/dest-1')
+            ->andReturn(true);
+    });
+
+    $this->deleteJson("/admin/v1/destinations/{$destination->id}")
+        ->assertStatus(200);
+
+    $this->assertDatabaseMissing('destinations', ['id' => $destination->id]);
+    $this->assertDatabaseMissing('media', [
+        'model_type' => Destination::class,
+        'model_id' => $destination->id,
+    ]);
 });
 
 it('allows an owner to attach media to their own business', function () {
@@ -89,7 +128,12 @@ it('allows admins to attach media to a destination', function () {
 });
 
 it('allows an owner to delete media from their own business', function () {
-    Http::fake(['api.cloudinary.com/*' => Http::response(['result' => 'ok'])]);
+    $this->mock(CloudinaryService::class, function ($mock) {
+        $mock->shouldReceive('destroy')
+            ->once()
+            ->with('jijel/businesses/test-1')
+            ->andReturn(true);
+    });
 
     $owner = mediaActingAs(mediaOwner());
     $business = Business::factory()->create(['owner_id' => $owner->id]);
@@ -122,7 +166,12 @@ it('denies media deletion by a non-owner', function () {
 });
 
 it('allows an owner to delete media from their own listing', function () {
-    Http::fake(['api.cloudinary.com/*' => Http::response(['result' => 'ok'])]);
+    $this->mock(CloudinaryService::class, function ($mock) {
+        $mock->shouldReceive('destroy')
+            ->once()
+            ->with('jijel/listings/test-1')
+            ->andReturn(true);
+    });
 
     $owner = mediaActingAs(mediaOwner());
     $business = Business::factory()->create(['owner_id' => $owner->id]);

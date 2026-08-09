@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Services\CloudinaryService;
+use Cloudinary\Cloudinary;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -13,7 +15,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(CloudinaryService::class, function (): CloudinaryService {
+            return new CloudinaryService(new Cloudinary([
+                'cloud' => [
+                    'cloud_name' => config('cloudinary.cloud_name'),
+                    'api_key' => config('cloudinary.api_key'),
+                    'api_secret' => config('cloudinary.api_secret'),
+                ],
+            ]));
+        });
     }
 
     /**

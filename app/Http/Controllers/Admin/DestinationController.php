@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreDestinationRequest;
 use App\Http\Requests\Admin\UpdateDestinationRequest;
 use App\Models\Destination;
+use App\Services\CloudinaryService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -63,8 +64,12 @@ class DestinationController extends Controller
         return response()->json($destination);
     }
 
-    public function destroy(Destination $destination): JsonResponse
+    public function destroy(Destination $destination, CloudinaryService $cloudinary): JsonResponse
     {
+        foreach ($destination->media as $media) {
+            $cloudinary->destroy($media->cloudinary_public_id);
+        }
+
         activity()
             ->causedBy(request()->user())
             ->performedOn($destination)
@@ -72,6 +77,7 @@ class DestinationController extends Controller
             ->withProperties(['name' => $destination->name])
             ->log('Deleted destination');
 
+        $destination->media()->delete();
         $destination->delete();
 
         return response()->json(['message' => 'Destination deleted successfully.']);
