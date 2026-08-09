@@ -187,3 +187,86 @@ it('allows an owner to delete media from their own listing', function () {
 
     $this->assertDatabaseMissing('media', ['id' => $media->id]);
 });
+
+it('promotes the first remaining media to cover when the cover is deleted', function () {
+    $this->mock(CloudinaryService::class, function ($mock) {
+        $mock->shouldReceive('destroy')
+            ->once()
+            ->with('jijel/businesses/cover-1')
+            ->andReturn(true);
+    });
+
+    $owner = mediaActingAs(mediaOwner());
+    $business = Business::factory()->create(['owner_id' => $owner->id]);
+
+    $cover = Media::factory()->create([
+        'model_type' => Business::class,
+        'model_id' => $business->id,
+        'cloudinary_public_id' => 'jijel/businesses/cover-1',
+        'collection' => 'gallery',
+        'is_cover' => true,
+        'sort_order' => 0,
+    ]);
+    $first = Media::factory()->create([
+        'model_type' => Business::class,
+        'model_id' => $business->id,
+        'cloudinary_public_id' => 'jijel/businesses/first-1',
+        'collection' => 'gallery',
+        'is_cover' => false,
+        'sort_order' => 1,
+    ]);
+    Media::factory()->create([
+        'model_type' => Business::class,
+        'model_id' => $business->id,
+        'cloudinary_public_id' => 'jijel/businesses/second-1',
+        'collection' => 'gallery',
+        'is_cover' => false,
+        'sort_order' => 2,
+    ]);
+
+    $this->deleteJson('/api/v1/media/delete', ['media_id' => $cover->id])
+        ->assertStatus(200);
+
+    $this->assertDatabaseMissing('media', ['id' => $cover->id]);
+    $this->assertDatabaseHas('media', [
+        'id' => $first->id,
+        'is_cover' => true,
+    ]);
+});
+
+it('does not promote media when deleting a non-cover item', function () {
+    $this->mock(CloudinaryService::class, function ($mock) {
+        $mock->shouldReceive('destroy')
+            ->once()
+            ->with('jijel/businesses/other-1')
+            ->andReturn(true);
+    });
+
+    $owner = mediaActingAs(mediaOwner());
+    $business = Business::factory()->create(['owner_id' => $owner->id]);
+
+    $cover = Media::factory()->create([
+        'model_type' => Business::class,
+        'model_id' => $business->id,
+        'cloudinary_public_id' => 'jijel/businesses/cover-1',
+        'collection' => 'gallery',
+        'is_cover' => true,
+        'sort_order' => 0,
+    ]);
+    $other = Media::factory()->create([
+        'model_type' => Business::class,
+        'model_id' => $business->id,
+        'cloudinary_public_id' => 'jijel/businesses/other-1',
+        'collection' => 'gallery',
+        'is_cover' => false,
+        'sort_order' => 1,
+    ]);
+
+    $this->deleteJson('/api/v1/media/delete', ['media_id' => $other->id])
+        ->assertStatus(200);
+
+    $this->assertDatabaseHas('media', [
+        'id' => $cover->id,
+        'is_cover' => true,
+    ]);
+});

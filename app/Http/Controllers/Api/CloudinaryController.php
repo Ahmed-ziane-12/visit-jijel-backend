@@ -128,6 +128,8 @@ class CloudinaryController extends Controller
 
     /**
      * Delete a media record from both Cloudinary and the database.
+     * If the deleted media was the cover, the first remaining media
+     * in the same collection becomes the new cover.
      */
     public function delete(Request $request, CloudinaryService $cloudinary): JsonResponse
     {
@@ -147,9 +149,34 @@ class CloudinaryController extends Controller
             ], 502);
         }
 
+        $wasCover = $media->is_cover;
+
         $media->delete();
 
+        if ($wasCover) {
+            $this->promoteFirstMediaToCover($media);
+        }
+
         return response()->json(['message' => 'Media deleted successfully.']);
+    }
+
+    /**
+     * Promote the first remaining media in the same collection to cover,
+     * ordered by sort_order then id to match display order.
+     */
+    private function promoteFirstMediaToCover(Media $deleted): void
+    {
+        $replacement = Media::query()
+            ->where('model_type', $deleted->model_type)
+            ->where('model_id', $deleted->model_id)
+            ->where('collection', $deleted->collection)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->first();
+
+        if ($replacement !== null) {
+            $replacement->update(['is_cover' => true]);
+        }
     }
 
     /**
