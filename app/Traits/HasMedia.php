@@ -72,6 +72,22 @@ trait HasMedia
     }
 
     /**
+     * Promote the given media to cover and move it to the front
+     * of the collection's sort order.
+     */
+    public function setCover(Media $media): void
+    {
+        $this->getMediaInCollection($media->collection)
+            ->whereKeyNot($media->getKey())
+            ->update([
+                'is_cover' => false,
+                'sort_order' => DB::raw('sort_order + 1'),
+            ]);
+
+        $media->update(['is_cover' => true, 'sort_order' => 0]);
+    }
+
+    /**
      * Detach and delete a media record.
      * Note: does NOT delete from Cloudinary — handle that in a job or webhook.
      */

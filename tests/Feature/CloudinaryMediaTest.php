@@ -170,6 +170,58 @@ it('moves a newly selected cover to the front of the media list', function () {
     ]);
 });
 
+it('allows an owner to set one of their media as the cover', function () {
+    $owner = mediaActingAs(mediaOwner());
+    $business = Business::factory()->create(['owner_id' => $owner->id]);
+
+    $first = Media::factory()->create([
+        'model_type' => Business::class,
+        'model_id' => $business->id,
+        'collection' => 'gallery',
+        'is_cover' => true,
+        'sort_order' => 0,
+    ]);
+    $second = Media::factory()->create([
+        'model_type' => Business::class,
+        'model_id' => $business->id,
+        'collection' => 'gallery',
+        'is_cover' => false,
+        'sort_order' => 1,
+    ]);
+
+    $this->postJson('/api/v1/media/cover', ['media_id' => $second->id])
+        ->assertStatus(200)
+        ->assertJsonPath('is_cover', true)
+        ->assertJsonPath('sort_order', 0);
+
+    $this->assertDatabaseHas('media', [
+        'id' => $first->id,
+        'is_cover' => false,
+        'sort_order' => 1,
+    ]);
+    $this->assertDatabaseHas('media', [
+        'id' => $second->id,
+        'is_cover' => true,
+        'sort_order' => 0,
+    ]);
+});
+
+it('denies setting a cover on someone elses media', function () {
+    $owner = mediaOwner();
+    $business = Business::factory()->create(['owner_id' => $owner->id]);
+    $media = Media::factory()->create([
+        'model_type' => Business::class,
+        'model_id' => $business->id,
+        'collection' => 'gallery',
+        'is_cover' => true,
+        'sort_order' => 0,
+    ]);
+
+    mediaActingAs(mediaUser());
+    $this->postJson('/api/v1/media/cover', ['media_id' => $media->id])
+        ->assertStatus(403);
+});
+
 it('allows an owner to delete media from their own business', function () {
     $this->mock(CloudinaryService::class, function ($mock) {
         $mock->shouldReceive('destroy')

@@ -61,6 +61,7 @@ Route::prefix('v1')->group(function () {
         Route::prefix('media')->group(function () {
             Route::post('signature', [CloudinaryController::class, 'signature']);
             Route::post('store', [CloudinaryController::class, 'store']);
+            Route::post('cover', [CloudinaryController::class, 'setCover']);
             Route::delete('delete', [CloudinaryController::class, 'delete']);
         });
 

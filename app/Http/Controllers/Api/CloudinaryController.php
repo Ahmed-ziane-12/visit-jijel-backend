@@ -127,6 +127,27 @@ class CloudinaryController extends Controller
     }
 
     /**
+     * Set an existing media as the cover and move it to the front
+     * of the collection's sort order.
+     */
+    public function setCover(Request $request): JsonResponse
+    {
+        $request->validate([
+            'media_id' => ['required', 'integer'],
+        ]);
+
+        $media = Media::findOrFail($request->input('media_id'));
+
+        if (! $this->canDeleteMedia($request->user(), $media)) {
+            return response()->json(['message' => 'Unauthorized.'], 403);
+        }
+
+        $media->model->setCover($media);
+
+        return response()->json($media->refresh());
+    }
+
+    /**
      * Delete a media record from both Cloudinary and the database.
      * If the deleted media was the cover, the first remaining media
      * in the same collection becomes the new cover.
