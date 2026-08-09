@@ -127,6 +127,49 @@ it('allows admins to attach media to a destination', function () {
         ->assertStatus(201);
 });
 
+it('moves a newly selected cover to the front of the media list', function () {
+    $owner = mediaActingAs(mediaOwner());
+    $business = Business::factory()->create(['owner_id' => $owner->id]);
+
+    Media::factory()->create([
+        'model_type' => Business::class,
+        'model_id' => $business->id,
+        'collection' => 'gallery',
+        'is_cover' => true,
+        'sort_order' => 0,
+    ]);
+    Media::factory()->create([
+        'model_type' => Business::class,
+        'model_id' => $business->id,
+        'collection' => 'gallery',
+        'is_cover' => false,
+        'sort_order' => 1,
+    ]);
+
+    $this->postJson('/api/v1/media/store', [...mediaPayload($business->id), 'is_cover' => true])
+        ->assertStatus(201);
+
+    $this->assertDatabaseHas('media', [
+        'model_type' => Business::class,
+        'model_id' => $business->id,
+        'cloudinary_public_id' => "jijel/businesss/test-{$business->id}",
+        'is_cover' => true,
+        'sort_order' => 0,
+    ]);
+    $this->assertDatabaseHas('media', [
+        'model_type' => Business::class,
+        'model_id' => $business->id,
+        'is_cover' => false,
+        'sort_order' => 1,
+    ]);
+    $this->assertDatabaseHas('media', [
+        'model_type' => Business::class,
+        'model_id' => $business->id,
+        'is_cover' => false,
+        'sort_order' => 2,
+    ]);
+});
+
 it('allows an owner to delete media from their own business', function () {
     $this->mock(CloudinaryService::class, function ($mock) {
         $mock->shouldReceive('destroy')

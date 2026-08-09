@@ -5,6 +5,7 @@ namespace App\Traits;
 use App\Models\Media;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @property int $id
@@ -47,7 +48,10 @@ trait HasMedia
     public function attachMedia(array $cloudinaryResponse, string $collection = 'default', bool $isCover = false): Media
     {
         if ($isCover) {
-            $this->getMediaInCollection($collection)->update(['is_cover' => false]);
+            $this->getMediaInCollection($collection)->update([
+                'is_cover' => false,
+                'sort_order' => DB::raw('sort_order + 1'),
+            ]);
         }
 
         return $this->media()->create([
@@ -63,7 +67,7 @@ trait HasMedia
             'size' => $cloudinaryResponse['bytes'] ?? null,
             'collection' => $collection,
             'is_cover' => $isCover,
-            'sort_order' => $this->media()->where('collection', $collection)->count(),
+            'sort_order' => $isCover ? 0 : $this->media()->where('collection', $collection)->count(),
         ]);
     }
 
