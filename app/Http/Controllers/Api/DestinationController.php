@@ -29,7 +29,9 @@ class DestinationController extends Controller
     {
         $destination->load([
             'media',
-            'reviews' => fn ($q) => $q->where('is_approved', true)->with('user:id,name,profile.media'),
+            'reviews' => fn ($q) => $q->where('is_approved', true)->with([
+                'user' => fn ($q) => $q->select('id', 'name')->with('profile.media'),
+            ]),
             'events' => fn ($q) => $q->published()->orderBy('starts_at')->with('media'),
         ]);
 
