@@ -27,7 +27,7 @@ class Profile extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function getAvatarUrlAttribute(): ?string
+    public function getAvatarAttribute(): ?string
     {
         return $this->media()
             ->where('collection', 'avatar')
