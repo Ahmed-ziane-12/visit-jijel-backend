@@ -80,7 +80,7 @@ class CloudinaryController extends Controller
      * Step 3 — Next.js sends Cloudinary's response to Laravel
      * after a successful upload, so we can store the media record.
      */
-    public function store(Request $request): JsonResponse
+    public function store(Request $request, CloudinaryService $cloudinary): JsonResponse
     {
         $data = $request->validate([
             'model_type' => ['required', 'string'],  // e.g. "destination"
@@ -115,6 +115,12 @@ class CloudinaryController extends Controller
 
         if (! $this->canAttachMedia($request->user(), $data['model_type'], $model)) {
             return response()->json(['message' => 'Unauthorized.'], 403);
+        }
+
+        // For client profiles, remove old media in the same collection
+        // so only the latest profile/cover image is kept.
+        if ($data['model_type'] === 'profile') {
+            $this->clearExistingMedia($model, $data['collection'], $cloudinary);
         }
 
         $media = $model->attachMedia(
@@ -197,6 +203,20 @@ class CloudinaryController extends Controller
 
         if ($replacement !== null) {
             $replacement->update(['is_cover' => true]);
+        }
+    }
+
+    /**
+     * Delete all existing media in a collection from both
+     * Cloudinary and the database.
+     */
+    private function clearExistingMedia(Model $model, string $collection, CloudinaryService $cloudinary): void
+    {
+        $existingMedia = $model->getMediaInCollection($collection)->get();
+
+        foreach ($existingMedia as $media) {
+            $cloudinary->destroy($media->cloudinary_public_id);
+            $media->delete();
         }
     }
 

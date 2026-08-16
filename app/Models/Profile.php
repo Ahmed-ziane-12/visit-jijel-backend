@@ -32,7 +32,7 @@ class Profile extends Model
     public function getAvatarAttribute(): ?string
     {
         return $this->media()
-            ->where('collection', 'avatar')
+            ->where('collection', 'profiles')
             ->first()
             ?->secure_url;
     }
