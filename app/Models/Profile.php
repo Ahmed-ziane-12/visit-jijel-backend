@@ -12,6 +12,8 @@ class Profile extends Model
 {
     use HasFactory, HasMedia, HasRole;
 
+    protected $appends = ['avatar'];
+
     protected $fillable = [
         'user_id',
         'role',
