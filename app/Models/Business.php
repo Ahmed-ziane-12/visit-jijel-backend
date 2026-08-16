@@ -13,6 +13,10 @@ class Business extends Model
 {
     use HasFactory, HasLocation, HasMedia;
 
+    protected $attributes = [
+        'is_active' => false,
+    ];
+
     protected $fillable = [
         'owner_id',
         'type',

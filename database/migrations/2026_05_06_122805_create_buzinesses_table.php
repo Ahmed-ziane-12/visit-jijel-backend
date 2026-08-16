@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('wilaya', 100)->nullable();
             $table->string('commune', 100)->nullable();
             $table->boolean('is_verified')->default(false);
-            $table->boolean('is_active')->default(true);
+            $table->boolean('is_active')->default(false);
             $table->timestamps();
         });
     }
