@@ -43,7 +43,7 @@ class PlanSeeder extends Seeder
         ];
 
         foreach ($plans as $plan) {
-            Plan::create($plan);
+            Plan::firstOrCreate($plan);
         }
     }
 }
