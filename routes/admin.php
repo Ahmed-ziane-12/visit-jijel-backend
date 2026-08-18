@@ -27,6 +27,7 @@ Route::name('admin.')->prefix('admin/v1')->group(function () {
         Route::apiResource('destinations', Admin\DestinationController::class);
         Route::apiResource('events', Admin\EventController::class)->except(['store']);
         Route::apiResource('reviews', Admin\ReviewController::class)->except(['store']);
+        Route::apiResource('plans', Admin\PlanController::class)->except(['store']);
 
         // Dashboard stats
         Route::get('stats', [Admin\AdminStatsController::class, 'index']);
