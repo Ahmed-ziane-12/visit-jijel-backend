@@ -1,4 +1,4 @@
-FROM composer:2 AS vendor
+FROM composer:2-php8.3-cli AS vendor
 
 WORKDIR /app
 

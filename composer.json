@@ -14,8 +14,8 @@
         "laravel/framework": "^13.0",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^3.0",
-        "pusher/pusher-php-server": "*",
-        "spatie/laravel-activitylog": "*"
+        "pusher/pusher-php-server": "^7.0",
+        "spatie/laravel-activitylog": "^5.0"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^3.7",
