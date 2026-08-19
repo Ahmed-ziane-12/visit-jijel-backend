@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\Api;
 use App\Http\Controllers\Api\CloudinaryController;
+use App\Http\Controllers\Api\CommentController;
+use App\Http\Controllers\Api\LikeController;
+use App\Http\Controllers\Api\PostController;
 use App\Http\Controllers\Api\SearchController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -65,6 +68,19 @@ Route::prefix('v1')->group(function () {
             Route::delete('delete', [CloudinaryController::class, 'delete']);
         });
 
+        // Posts
+        Route::post('posts', [PostController::class, 'store']);
+        Route::delete('posts/{post}', [PostController::class, 'destroy']);
+
+        // Comments
+        Route::post('posts/{post}/comments', [CommentController::class, 'store']);
+        Route::post('comments/{comment}/reply', [CommentController::class, 'reply']);
+        Route::delete('comments/{comment}', [CommentController::class, 'destroy']);
+
+        // Likes
+        Route::post('{likeableType}/{likeableId}/like', [LikeController::class, 'toggleLike']);
+        Route::post('{likeableType}/{likeableId}/dislike', [LikeController::class, 'toggleDislike']);
+
     }); // end auth:sanctum
 
     // ── Public routes ─────────────────────────────────────────
@@ -76,5 +92,12 @@ Route::prefix('v1')->group(function () {
     Route::apiResource('events', Api\EventController::class)->only(['index', 'show']);
     Route::get('reviews', [Api\ReviewController::class, 'index']);
     Route::get('search', SearchController::class);
+
+    // Posts — public
+    Route::get('users/{user}/posts', [PostController::class, 'userPosts']);
+    Route::get('posts/{post}', [PostController::class, 'show']);
+
+    // Users — public profile
+    Route::get('users/{user}', [Api\Auth\AuthController::class, 'showProfile']);
 
 }); // end v1

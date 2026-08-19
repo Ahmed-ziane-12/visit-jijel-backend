@@ -8,6 +8,7 @@ use App\Models\Destination;
 use App\Models\Event;
 use App\Models\Listing;
 use App\Models\Media;
+use App\Models\Post;
 use App\Models\Profile;
 use App\Models\User;
 use App\Services\CloudinaryService;
@@ -24,6 +25,7 @@ class CloudinaryController extends Controller
         'jijel/events',
         'jijel/destinations',
         'jijel/profiles',
+        'jijel/posts',
     ];
 
     /**
@@ -104,6 +106,7 @@ class CloudinaryController extends Controller
             'business' => Business::class,
             'event' => Event::class,
             'profile' => Profile::class,
+            'post' => Post::class,
         ];
 
         if (! isset($modelMap[$data['model_type']])) {
@@ -235,6 +238,7 @@ class CloudinaryController extends Controller
             'listing' => $user->id === $model->business?->owner_id,
             'event' => $user->id === $model->created_by,
             'profile' => $user->id === $model->user_id,
+            'post' => $user->id === $model->user_id,
             default => false,
         };
     }
@@ -263,6 +267,10 @@ class CloudinaryController extends Controller
         }
 
         if ($model instanceof Profile) {
+            return $user->id === $model->user_id;
+        }
+
+        if ($model instanceof Post) {
             return $user->id === $model->user_id;
         }
 

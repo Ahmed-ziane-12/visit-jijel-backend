@@ -287,4 +287,21 @@ class AuthController extends Controller
             $request->user()->load(['profile', 'profile.media'])
         );
     }
+
+    // ──────────────────────────────────────────────────────────
+    //  PUBLIC PROFILE
+    // ──────────────────────────────────────────────────────────
+
+    public function showProfile(User $user): JsonResponse
+    {
+        $isOwner = auth()->check() && auth()->id() === $user->id;
+
+        $data = $user->load(['profile', 'profile.media']);
+
+        if (! $isOwner) {
+            $data->setHidden(array_merge($data->getHidden(), ['email']));
+        }
+
+        return response()->json($data);
+    }
 }
