@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\PostLiked;
 use App\Http\Controllers\Controller;
 use App\Models\Comment;
 use App\Models\Like;
@@ -31,11 +32,13 @@ class LikeController extends Controller
         if ($existing) {
             if ($existing->type === 'like') {
                 $existing->delete();
+                $this->broadcastLikeUpdate($model);
 
                 return response()->json(['message' => 'Like removed.', 'liked' => false]);
             }
 
             $existing->update(['type' => 'like']);
+            $this->broadcastLikeUpdate($model);
 
             return response()->json(['message' => 'Liked.', 'liked' => true]);
         }
@@ -46,6 +49,8 @@ class LikeController extends Controller
             'likeable_id' => $model->id,
             'type' => 'like',
         ]);
+
+        $this->broadcastLikeUpdate($model);
 
         return response()->json(['message' => 'Liked.', 'liked' => true], 201);
     }
@@ -69,11 +74,13 @@ class LikeController extends Controller
         if ($existing) {
             if ($existing->type === 'dislike') {
                 $existing->delete();
+                $this->broadcastLikeUpdate($model);
 
                 return response()->json(['message' => 'Dislike removed.', 'disliked' => false]);
             }
 
             $existing->update(['type' => 'dislike']);
+            $this->broadcastLikeUpdate($model);
 
             return response()->json(['message' => 'Disliked.', 'disliked' => true]);
         }
@@ -84,6 +91,8 @@ class LikeController extends Controller
             'likeable_id' => $model->id,
             'type' => 'dislike',
         ]);
+
+        $this->broadcastLikeUpdate($model);
 
         return response()->json(['message' => 'Disliked.', 'disliked' => true], 201);
     }
@@ -100,5 +109,19 @@ class LikeController extends Controller
         };
 
         return $model;
+    }
+
+    /**
+     * Broadcast the like count update for the given model.
+     */
+    private function broadcastLikeUpdate(Model $model): void
+    {
+        $likesCount = $model->likes()->where('type', 'like')->count();
+        $dislikesCount = $model->likes()->where('type', 'dislike')->count();
+
+        if ($model instanceof Post) {
+            $like = $model->likes()->latest()->first();
+            broadcast(new PostLiked($like, $likesCount, $dislikesCount));
+        }
     }
 }

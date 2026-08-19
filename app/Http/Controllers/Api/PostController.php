@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\PostCreated;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StorePostRequest;
 use App\Models\Post;
@@ -77,6 +78,8 @@ class PostController extends Controller
         );
 
         $post->load(['user.profile.media']);
+
+        broadcast(new PostCreated($post));
 
         return response()->json($post, 201);
     }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\CommentCreated;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StoreCommentRequest;
 use App\Models\Comment;
@@ -25,6 +26,8 @@ class CommentController extends Controller
 
         $comment->load('user.profile.media');
 
+        broadcast(new CommentCreated($comment));
+
         return response()->json($comment, 201);
     }
 
@@ -40,6 +43,8 @@ class CommentController extends Controller
         ]);
 
         $reply->load('user.profile.media');
+
+        broadcast(new CommentCreated($reply));
 
         return response()->json($reply, 201);
     }
