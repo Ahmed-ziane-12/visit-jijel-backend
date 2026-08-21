@@ -77,7 +77,7 @@ class PostController extends Controller
             $request->only(['body', 'shareable_type', 'shareable_id', 'parent_post_id'])
         );
 
-        $post->load(['user.profile.media']);
+        $post->load(['user.profile.media', 'media', 'shareable', 'likes', 'comments.user.profile.media']);
 
         broadcast(new PostCreated($post));
 
