@@ -1,4 +1,4 @@
-FROM composer:2-php8.3-cli AS vendor
+FROM composer:2.8 AS vendor
 
 WORKDIR /app
 
@@ -7,7 +7,8 @@ RUN composer install \
     --no-dev \
     --no-interaction \
     --no-scripts \
-    --optimize-autoloader
+    --optimize-autoloader \
+    --ignore-platform-req=php
 
 FROM php:8.4-fpm-alpine
 
