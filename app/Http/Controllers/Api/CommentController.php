@@ -24,7 +24,7 @@ class CommentController extends Controller
             'body' => $request->validated('body'),
         ]);
 
-        $comment->load('user.profile.media');
+        $comment->load('user.profile.media', 'likes');
 
         broadcast(new CommentCreated($comment));
 
@@ -42,7 +42,7 @@ class CommentController extends Controller
             'body' => $request->validated('body'),
         ]);
 
-        $reply->load('user.profile.media');
+        $reply->load('user.profile.media', 'likes');
 
         broadcast(new CommentCreated($reply));
 

@@ -16,7 +16,7 @@ class CommentCreated implements ShouldBroadcast
     public function __construct(
         public Comment $comment,
     ) {
-        $this->comment->load(['user.profile.media']);
+        $this->comment->load(['user.profile.media', 'likes']);
     }
 
     public function broadcastOn(): array
@@ -44,7 +44,7 @@ class CommentCreated implements ShouldBroadcast
                 'name' => $this->comment->user->name,
                 'profile' => $this->comment->user->profile,
             ],
-            'likes' => [],
+            'likes' => $this->comment->likes ?? [],
             'replies' => [],
         ];
     }
