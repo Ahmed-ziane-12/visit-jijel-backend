@@ -70,6 +70,7 @@ Route::prefix('v1')->group(function () {
 
         // Posts
         Route::post('posts', [PostController::class, 'store']);
+        Route::put('posts/{post}', [PostController::class, 'update']);
         Route::delete('posts/{post}', [PostController::class, 'destroy']);
 
         // Comments

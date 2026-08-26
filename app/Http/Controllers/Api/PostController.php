@@ -25,7 +25,7 @@ class PostController extends Controller
                 'user.profile.media',
                 'media',
                 'likes',
-                'comments' => fn ($q) => $q->with('user.profile.media')->latest(),
+                'comments' => fn ($q) => $q->whereNull('parent_comment_id')->with('user.profile.media')->latest(),
                 'comments.likes',
                 'comments.replies' => fn ($q) => $q->with('user.profile.media')->latest(),
                 'comments.replies.likes',
@@ -82,6 +82,24 @@ class PostController extends Controller
         broadcast(new PostCreated($post));
 
         return response()->json($post, 201);
+    }
+
+    /**
+     * Update a post (owner only).
+     */
+    public function update(Request $request, Post $post): JsonResponse
+    {
+        $this->authorize('delete', $post);
+
+        $validated = $request->validate([
+            'body' => 'required|string|max:5000',
+        ]);
+
+        $post->update($validated);
+
+        $post->load(['user.profile.media', 'media', 'shareable', 'likes', 'comments.user.profile.media']);
+
+        return response()->json($post);
     }
 
     /**
