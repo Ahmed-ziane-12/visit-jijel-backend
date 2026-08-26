@@ -32,7 +32,12 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         ResetPassword::createUrlUsing(function (object $notifiable, string $token) {
-            return config('app.frontend_url')."/password-reset/$token?email={$notifiable->getEmailForPasswordReset()}";
+            $isAdmin = $notifiable->is_admin ?? false;
+            $base = $isAdmin
+                ? config('app.admin_url', config('app.frontend_url'))
+                : config('app.frontend_url');
+
+            return $base."/reset-password?token=$token&email={$notifiable->getEmailForPasswordReset()}";
         });
 
         Password::defaults(function () {
