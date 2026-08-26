@@ -11,6 +11,11 @@ Route::name('admin.')->prefix('admin/v1')->group(function () {
     Route::middleware(['auth:sanctum', 'admin'])->group(function () {
         Route::post('logout', [AuthController::class, 'logout']);
 
+        // Profile
+        Route::get('profile', [AuthController::class, 'profile']);
+        Route::put('profile', [AuthController::class, 'updateProfile']);
+        Route::put('profile/password', [AuthController::class, 'updatePassword']);
+
         // First login password reset — before anything else
         Route::post('reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:5,1');
 

@@ -194,4 +194,51 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'Admin account deleted.']);
     }
+
+    // ── Get current admin profile ─────────────────────────────
+    public function profile(Request $request): JsonResponse
+    {
+        $user = $request->user()->load(['profile']);
+
+        return response()->json($user);
+    }
+
+    // ── Update current admin profile ──────────────────────────
+    public function updateProfile(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'name' => ['sometimes', 'string', 'max:100'],
+            'email' => ['sometimes', 'email', 'unique:users,email,'.$request->user()->id],
+        ]);
+
+        $request->user()->update($data);
+
+        return response()->json($request->user()->fresh(['profile']));
+    }
+
+    // ── Change current admin password ─────────────────────────
+    public function updatePassword(Request $request): JsonResponse
+    {
+        $request->validate([
+            'current_password' => ['required', 'string'],
+            'password' => ['required', 'confirmed', Password::min(8)->letters()->mixedCase()->numbers()],
+        ]);
+
+        $user = $request->user();
+
+        if (! Hash::check($request->current_password, $user->password)) {
+            return response()->json(['message' => 'Current password is incorrect.'], 422);
+        }
+
+        $user->update([
+            'password' => Hash::make($request->password),
+        ]);
+
+        activity()
+            ->causedBy($user)
+            ->event('password_changed')
+            ->log('Changed password');
+
+        return response()->json(['message' => 'Password updated successfully.']);
+    }
 }
