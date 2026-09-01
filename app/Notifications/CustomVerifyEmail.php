@@ -3,13 +3,18 @@
 namespace App\Notifications;
 
 use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\URL;
 
-class CustomVerifyEmail extends VerifyEmail
+class CustomVerifyEmail extends VerifyEmail implements ShouldQueue
 {
+    use Queueable, SerializesModels;
+
     protected function verificationUrl($notifiable): string
     {
         $backendUrl = URL::temporarySignedRoute(
