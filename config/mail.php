@@ -70,6 +70,12 @@ return [
             'path' => env('MAIL_SENDMAIL_PATH', '/usr/sbin/sendmail -bs -i'),
         ],
 
+        'brevo' => [
+            'transport' => 'brevo',
+            'key' => env('BREVO_API_KEY'),
+            'timeout' => env('MAIL_TIMEOUT', 10),
+        ],
+
         'log' => [
             'transport' => 'log',
             'channel' => env('MAIL_LOG_CHANNEL'),

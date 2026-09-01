@@ -2,9 +2,12 @@
 
 namespace App\Providers;
 
+use App\Mail\Transport\BrevoTransport;
 use App\Services\CloudinaryService;
 use Cloudinary\Cloudinary;
+use GuzzleHttp\Client;
 use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -31,6 +34,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Mail::extend('brevo', function (array $config): BrevoTransport {
+            return new BrevoTransport(
+                $config['key'] ?? '',
+                new Client(['timeout' => $config['timeout'] ?? 10])
+            );
+        });
+
         ResetPassword::createUrlUsing(function (object $notifiable, string $token) {
             $isAdmin = $notifiable->is_admin ?? false;
             $base = $isAdmin
