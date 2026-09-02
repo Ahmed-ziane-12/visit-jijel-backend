@@ -63,6 +63,34 @@ it('sends email via brevo api', function () {
         ->toBe('msg-xyz');
 });
 
+it('always sends a non-empty recipient name to brevo', function () {
+    $client = Mockery::mock(Client::class);
+    $client->shouldReceive('request')->once()->with(
+        'POST',
+        'https://api.brevo.com/v3/smtp/email',
+        Mockery::on(function (array $options) {
+            expect($options['json']['to'][0]['name'])->not->toBe('')
+                ->and($options['json']['to'][0]['name'])->not->toBeNull()
+                ->and($options['json']['to'][0]['name'])->toBe('to');
+
+            return true;
+        })
+    )->andReturn(new Response(200, [], json_encode(['messageId' => 'msg-xyz'])));
+
+    $transport = new BrevoTransport('test-key', $client);
+
+    $email = (new Email)
+        ->from(new Address('from@test.com'))
+        ->to(new Address('to@test.com'))
+        ->subject('Test')
+        ->text('test');
+
+    $transport->send($email, new Envelope(
+        new Address('from@test.com'),
+        [new Address('to@test.com')]
+    ));
+});
+
 it('throws transport exception on api error', function () {
     $client = Mockery::mock(Client::class);
     $client->shouldReceive('request')->once()->andReturn(

@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Symfony\Component\Mime\Address;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -167,5 +168,18 @@ class User extends Authenticatable implements MustVerifyEmail
     public function sendPasswordResetNotification($token): void
     {
         $this->notify(new QueuedResetPassword($token));
+    }
+
+    /**
+     * Route notifications to an email address carrying the user's name so
+     * the mail transport can include a proper recipient name.
+     */
+    public function routeNotificationFor(string $driver, $notification = null): mixed
+    {
+        if ($driver === 'mail' && $this->email) {
+            return new Address($this->email, $this->name);
+        }
+
+        return parent::routeNotificationFor($driver, $notification);
     }
 }

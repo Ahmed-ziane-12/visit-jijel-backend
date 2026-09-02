@@ -106,9 +106,11 @@ class BrevoTransport extends AbstractTransport
      */
     protected function address(Address $address): array
     {
+        $name = $address->getName() ?: explode('@', $address->getAddress())[0];
+
         return [
             'email' => $address->getAddress(),
-            'name' => $address->getName() ?? explode('@', $address->getAddress())[0],
+            'name' => $name,
         ];
     }
 
