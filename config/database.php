@@ -96,6 +96,10 @@ return [
             'prefix' => '',
             'prefix_indexes' => true,
             'search_path' => 'public',
+            'sslmode' => env('DB_SSLMODE', env('DB_SSL_MODE', 'prefer')),
+            'sslcert' => env('DB_SSL_CERT'),
+            'sslkey' => env('DB_SSL_KEY'),
+            'sslrootcert' => env('DB_SSL_ROOT_CERT'),
         ],
 
         'sqlsrv' => [
