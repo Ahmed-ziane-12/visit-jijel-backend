@@ -102,13 +102,13 @@ class BrevoTransport extends AbstractTransport
     }
 
     /**
-     * @return array{email: ?string, name: string}
+     * @return array{email: string, name: string}
      */
     protected function address(Address $address): array
     {
         return [
             'email' => $address->getAddress(),
-            'name' => $address->getName() ?? '',
+            'name' => $address->getName() ?? explode('@', $address->getAddress())[0],
         ];
     }
 
