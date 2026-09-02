@@ -10,7 +10,6 @@ use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
-use Symfony\Component\Mime\Address;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -72,7 +71,7 @@ class AppServiceProvider extends ServiceProvider
         $name = $this->clean((string) config('mail.from.name'));
 
         if ($address !== '') {
-            Mail::alwaysFrom(new Address($address, $name));
+            Mail::alwaysFrom($address, $name);
         }
     }
 

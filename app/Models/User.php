@@ -12,7 +12,6 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Symfony\Component\Mime\Address;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -186,17 +185,14 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Route notifications to an email address carrying the user's name so
-     * the mail transport can include a proper recipient name.
+     * Route notifications to a plain string email so Laravel's mail channel
+     * and transport can build recipient addresses cleanly. The transport
+     * supplies a recipient name fallback when none is provided.
      */
     public function routeNotificationFor(string $driver, $notification = null): mixed
     {
         if ($driver === 'mail') {
-            $email = $this->cleanEmail((string) $this->email);
-
-            if ($email !== '') {
-                return new Address($email, $this->name);
-            }
+            return $this->cleanEmail((string) $this->email);
         }
 
         return parent::routeNotificationFor($driver, $notification);
