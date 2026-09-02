@@ -3,6 +3,7 @@
 use App\Models\User;
 use App\Notifications\QueuedResetPassword;
 use Illuminate\Support\Facades\Notification;
+use Symfony\Component\Mime\Address;
 
 test('reset password link can be requested', function () {
     Notification::fake();
@@ -13,6 +14,19 @@ test('reset password link can be requested', function () {
         ->assertOk();
 
     Notification::assertSentTo($user, QueuedResetPassword::class);
+});
+
+test('mail routing strips control characters from a dirty stored email', function () {
+    $user = User::factory()->create();
+
+    $dirty = "az.ahmedziane@example.com\x1F";
+
+    $user->setRawAttributes(['email' => $dirty] + $user->getAttributes(), true);
+
+    $recipient = $user->routeNotificationFor('mail');
+
+    expect($recipient)->toBeInstanceOf(Address::class)
+        ->and($recipient->getAddress())->toBe('az.ahmedziane@example.com');
 });
 
 test('password can be reset with valid token', function () {

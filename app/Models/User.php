@@ -171,13 +171,32 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Strip control / invisible characters that break address handling.
+     */
+    protected function cleanEmail(string $email): string
+    {
+        $email = preg_replace('/[\x00-\x1F\x7F]/u', '', $email);
+
+        return trim((string) $email);
+    }
+
+    public function setEmailAttribute(?string $value): void
+    {
+        $this->attributes['email'] = $value === null ? null : $this->cleanEmail($value);
+    }
+
+    /**
      * Route notifications to an email address carrying the user's name so
      * the mail transport can include a proper recipient name.
      */
     public function routeNotificationFor(string $driver, $notification = null): mixed
     {
-        if ($driver === 'mail' && $this->email) {
-            return new Address($this->email, $this->name);
+        if ($driver === 'mail') {
+            $email = $this->cleanEmail((string) $this->email);
+
+            if ($email !== '') {
+                return new Address($email, $this->name);
+            }
         }
 
         return parent::routeNotificationFor($driver, $notification);
