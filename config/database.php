@@ -97,6 +97,10 @@ return [
             'prefix_indexes' => true,
             'search_path' => 'public',
             'sslmode' => env('DB_SSLMODE', env('DB_SSL_MODE', 'prefer')),
+            // libpq (php 8.x-fpm-alpine) tries to load a client cert even under sslmode=require,
+            // failing on /root/.postgresql/postgresql.crt for non-root users. Point sslcert/sslkey
+            // at a NON-EXISTENT path so libpq skips the lookup (a real empty file like /dev/null
+            // triggers "no start line"). Set these in production; keep null for local dev.
             'sslcert' => env('DB_SSL_CERT'),
             'sslkey' => env('DB_SSL_KEY'),
             'sslrootcert' => env('DB_SSL_ROOT_CERT'),
