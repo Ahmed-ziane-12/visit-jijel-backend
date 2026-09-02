@@ -101,22 +101,4 @@ Route::prefix('v1')->group(function () {
     // Users — public profile
     Route::get('users/{user}', [Api\Auth\AuthController::class, 'showProfile']);
 
-    // Debug — temporary
-    Route::get('debug/db', function () {
-        $sslmode = config('database.connections.pgsql.sslmode');
-        $host = config('database.connections.pgsql.host');
-        try {
-            DB::connection()->getPdo();
-            $db = 'connected';
-        } catch (Throwable $e) {
-            $db = $e->getMessage();
-        }
-
-        return response()->json([
-            'sslmode' => $sslmode,
-            'host' => $host,
-            'db' => $db,
-        ]);
-    });
-
 }); // end v1
