@@ -10,6 +10,7 @@ use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Symfony\Component\Mime\Address;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -41,6 +42,8 @@ class AppServiceProvider extends ServiceProvider
             );
         });
 
+        $this->sanitizeGlobalMailFrom();
+
         ResetPassword::createUrlUsing(function (object $notifiable, string $token) {
             $isAdmin = $notifiable->is_admin ?? false;
             $base = $isAdmin
@@ -57,5 +60,24 @@ class AppServiceProvider extends ServiceProvider
                 ->numbers();
         });
 
+    }
+
+    /**
+     * Enforce a clean global "from" address so hidden control characters in
+     * the MAIL_FROM_ADDRESS/MAIL_FROM_NAME env values never break sends.
+     */
+    protected function sanitizeGlobalMailFrom(): void
+    {
+        $address = $this->clean((string) config('mail.from.address'));
+        $name = $this->clean((string) config('mail.from.name'));
+
+        if ($address !== '') {
+            Mail::alwaysFrom(new Address($address, $name));
+        }
+    }
+
+    protected function clean(string $value): string
+    {
+        return trim((string) preg_replace('/[\x00-\x1F\x7F]/u', '', $value));
     }
 }
