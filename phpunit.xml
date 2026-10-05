@@ -24,6 +24,11 @@
         <env name="BROADCAST_CONNECTION" value="null"/>
         <env name="CACHE_STORE" value="array"/>
         <env name="DB_CONNECTION" value="pgsql"/>
+        <!-- DB_URL must be overridden too: the pgsql connection's `url` key is
+             merged over the individual DB_* keys (ConfigurationUrlParser), so a
+             DB_URL left over from .env would silently point the test suite at
+             the real dev database and migrate:fresh would wipe it. -->
+        <env name="DB_URL" value="pgsql://ahmed:ahmed@127.0.0.1:5432/visitJijel_test"/>
         <env name="DB_HOST" value="127.0.0.1"/>
         <env name="DB_PORT" value="5432"/>
         <env name="DB_DATABASE" value="visitJijel_test"/>
