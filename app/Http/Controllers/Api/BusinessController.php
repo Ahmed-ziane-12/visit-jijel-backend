@@ -9,6 +9,7 @@ use App\Models\Business;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class BusinessController extends Controller
 {
@@ -50,6 +51,7 @@ class BusinessController extends Controller
     {
         $business->load([
             'owner:id,name',
+            'detail',
             'media',
             'listings' => fn ($q) => $q->published()->with('media'),
             'events' => fn ($q) => $q->published()->orderBy('starts_at')->with('media'),
@@ -62,9 +64,24 @@ class BusinessController extends Controller
     {
         $this->authorize('create', Business::class);
 
-        $business = $request->user()->businesses()->create($request->validated());
+        $business = DB::transaction(function () use ($request) {
+            $business = $request->user()->businesses()->create(
+                $request->safe()->except('detail')
+            );
 
-        return response()->json($business->load('media'), 201);
+            $detail = array_filter(
+                $request->validated('detail') ?? [],
+                fn ($value) => $value !== null && $value !== '' && $value !== [],
+            );
+
+            if ($detail !== []) {
+                $business->detail()->create($detail);
+            }
+
+            return $business;
+        });
+
+        return response()->json($business->load(['media', 'detail']), 201);
     }
 
     public function update(UpdateBusinessRequest $request, Business $business): JsonResponse
