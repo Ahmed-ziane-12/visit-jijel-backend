@@ -14,6 +14,15 @@ class Business extends Model
 {
     use HasFactory, HasLocation, HasMedia;
 
+    /**
+     * Keep writes storing the full class name even though a morph map
+     * (used to resolve legacy `shareable_type` aliases) is registered.
+     */
+    public function getMorphClass(): string
+    {
+        return static::class;
+    }
+
     protected $attributes = [
         'is_active' => false,
     ];

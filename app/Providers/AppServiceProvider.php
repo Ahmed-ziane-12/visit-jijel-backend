@@ -3,10 +3,14 @@
 namespace App\Providers;
 
 use App\Mail\Transport\BrevoTransport;
+use App\Models\Business;
+use App\Models\Destination;
+use App\Models\Event;
 use App\Services\CloudinaryService;
 use Cloudinary\Cloudinary;
 use GuzzleHttp\Client;
 use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -34,6 +38,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Relation::morphMap([
+            'destination' => Destination::class,
+            'business' => Business::class,
+            'event' => Event::class,
+        ]);
+
         Mail::extend('brevo', function (array $config): BrevoTransport {
             return new BrevoTransport(
                 $config['key'] ?? '',

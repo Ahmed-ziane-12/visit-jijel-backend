@@ -16,7 +16,7 @@ class StorePostRequest extends FormRequest
         return [
             'body' => ['nullable', 'string', 'max:5000'],
             'shareable_type' => ['nullable', 'string', 'in:destination,business,event'],
-            'shareable_id' => ['required_with:shareable_type', 'integer', 'exists:destinations,id'],
+            'shareable_id' => ['required_with:shareable_type', 'integer'],
             'parent_post_id' => ['nullable', 'integer', 'exists:posts,id'],
         ];
     }

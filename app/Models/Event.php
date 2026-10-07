@@ -16,6 +16,15 @@ class Event extends Model
 {
     use HasCoverImage, HasFactory, HasLocation, HasMedia, HasReviews, HasStatus;
 
+    /**
+     * Keep writes storing the full class name even though a morph map
+     * (used to resolve legacy `shareable_type` aliases) is registered.
+     */
+    public function getMorphClass(): string
+    {
+        return static::class;
+    }
+
     protected $fillable = [
         'business_id',
         'destination_id',
