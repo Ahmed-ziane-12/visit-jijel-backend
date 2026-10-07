@@ -34,8 +34,12 @@ it('lists only the owned itineraries with their days and items', function () {
 
     $response->assertOk()
         ->assertJsonCount(1, 'data')
-        ->assertJsonPath('data.0.title', $trip->title)
-        ->assertJsonCount(1, 'data.0.days')
+        ->assertJsonPath('data.0.title', $trip->title);
+
+    expect($response->json('data.0.start_date'))->toMatch('/^\d{4}-\d{2}-\d{2}T00:00:00/');
+    expect($response->json('data.0.end_date'))->toMatch('/^\d{4}-\d{2}-\d{2}T00:00:00/');
+
+    $response->assertJsonCount(1, 'data.0.days')
         ->assertJsonPath('data.0.days.0.day_number', 1)
         ->assertJsonCount(1, 'data.0.days.0.items')
         ->assertJsonPath('data.0.days.0.items.0.title', 'Corniche')
