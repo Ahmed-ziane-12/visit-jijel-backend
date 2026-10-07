@@ -18,7 +18,7 @@ class ItineraryController extends Controller
     {
         $itineraries = $request->user()
             ->itineraries()
-            ->with('days')
+            ->with(['days.items', 'days.items.destination'])
             ->orderByDesc('created_at')
             ->paginate(10);
 
