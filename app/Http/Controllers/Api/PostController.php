@@ -32,9 +32,9 @@ class PostController extends Controller
                 'parentPost' => fn ($q) => $q->with([
                     'user.profile.media',
                     'media',
-                    'shareable',
+                    'shareable.media',
                 ]),
-                'shareable',
+                'shareable.media',
             ])
             ->latest()
             ->paginate(15);
@@ -58,9 +58,9 @@ class PostController extends Controller
             'parentPost' => fn ($q) => $q->with([
                 'user.profile.media',
                 'media',
-                'shareable',
+                'shareable.media',
             ]),
-            'shareable',
+            'shareable.media',
         ]);
 
         return response()->json($post);
@@ -77,7 +77,7 @@ class PostController extends Controller
             $request->only(['body', 'shareable_type', 'shareable_id', 'parent_post_id'])
         );
 
-        $post->load(['user.profile.media', 'media', 'shareable', 'likes', 'comments.user.profile.media']);
+        $post->load(['user.profile.media', 'media', 'shareable.media', 'likes', 'comments.user.profile.media']);
 
         broadcast(new PostCreated($post));
 
@@ -97,7 +97,7 @@ class PostController extends Controller
 
         $post->update($validated);
 
-        $post->load(['user.profile.media', 'media', 'shareable', 'likes', 'comments.user.profile.media']);
+        $post->load(['user.profile.media', 'media', 'shareable.media', 'likes', 'comments.user.profile.media']);
 
         return response()->json($post);
     }

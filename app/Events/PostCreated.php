@@ -16,7 +16,7 @@ class PostCreated implements ShouldBroadcast
     public function __construct(
         public Post $post,
     ) {
-        $this->post->load(['user.profile.media', 'media', 'shareable', 'parentPost.user.profile.media']);
+        $this->post->load(['user.profile.media', 'media', 'shareable.media', 'parentPost.user.profile.media']);
     }
 
     public function broadcastOn(): array

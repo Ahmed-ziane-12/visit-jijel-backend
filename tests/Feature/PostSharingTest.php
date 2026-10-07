@@ -10,6 +10,16 @@ use Laravel\Sanctum\Sanctum;
 it('shares a destination as a post', function () {
     $user = User::factory()->has(Profile::factory()->client())->create();
     $destination = Destination::factory()->create();
+    $destination->media()->create([
+        'cloudinary_public_id' => 'jijel/destinations/test-1',
+        'url' => 'https://res.cloudinary.com/test/image/upload/v1/dest1.jpg',
+        'secure_url' => 'https://res.cloudinary.com/test/image/upload/v1/dest1.jpg',
+        'format' => 'jpg',
+        'resource_type' => 'image',
+        'collection' => 'gallery',
+        'is_cover' => true,
+        'sort_order' => 0,
+    ]);
 
     Sanctum::actingAs($user);
 
@@ -24,6 +34,8 @@ it('shares a destination as a post', function () {
         ->assertJsonPath('shareable_type', 'destination')
         ->assertJsonPath('shareable.id', $destination->id)
         ->assertJsonPath('shareable.name', $destination->name)
+        ->assertJsonCount(1, 'shareable.media')
+        ->assertJsonPath('shareable.media.0.secure_url', 'https://res.cloudinary.com/test/image/upload/v1/dest1.jpg')
         ->assertJsonPath('user_id', $user->id);
 });
 
