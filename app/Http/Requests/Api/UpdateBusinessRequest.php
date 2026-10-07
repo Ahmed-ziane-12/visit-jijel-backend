@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\Api;
 
+use App\Enums\PriceUnit;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateBusinessRequest extends FormRequest
 {
@@ -26,6 +28,17 @@ class UpdateBusinessRequest extends FormRequest
             'wilaya' => ['nullable', 'string', 'max:100'],
             'commune' => ['nullable', 'string', 'max:100'],
             'is_active' => ['sometimes', 'boolean'],
+            'detail' => ['sometimes', 'array'],
+            'detail.average_price' => ['nullable', 'numeric', 'min:0', 'max:99999999.99'],
+            'detail.price_unit' => ['nullable', Rule::enum(PriceUnit::class)],
+            'detail.number_of_rooms' => ['nullable', 'integer', 'min:0', 'max:100000'],
+            'detail.star_rating' => ['nullable', 'integer', 'between:1,5'],
+            'detail.cuisine_type' => ['nullable', 'string', 'max:100'],
+            'detail.seating_capacity' => ['nullable', 'integer', 'min:0', 'max:100000'],
+            'detail.amenities' => ['nullable', 'array', 'max:50'],
+            'detail.amenities.*' => ['string', 'max:100'],
+            'detail.services' => ['nullable', 'array', 'max:50'],
+            'detail.services.*' => ['string', 'max:100'],
         ];
     }
 }

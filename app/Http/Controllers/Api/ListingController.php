@@ -15,6 +15,19 @@ class ListingController extends Controller
 {
     use AuthorizesRequests;
 
+    // Owner view: every status, not only published listings.
+    public function mine(Business $business): JsonResponse
+    {
+        $this->authorize('update', $business);
+
+        $listings = $business->listings()
+            ->with('media')
+            ->latest()
+            ->get();
+
+        return response()->json($listings);
+    }
+
     // Nested route: /businesses/{business}/listings
     public function index(Request $request, Business $business): JsonResponse
     {

@@ -54,6 +54,8 @@ Route::prefix('v1')->group(function () {
 
         // Businesses — owner only
         Route::get('my-businesses', [Api\BusinessController::class, 'myBusinesses']);
+        Route::get('my-businesses/{business}', [Api\BusinessController::class, 'myBusiness']);
+        Route::get('my-businesses/{business}/listings', [Api\ListingController::class, 'mine']);
         Route::apiResource('businesses', Api\BusinessController::class)->except(['index', 'show']);
         Route::apiResource('businesses.listings', Api\ListingController::class)->except(['index', 'show']);
 

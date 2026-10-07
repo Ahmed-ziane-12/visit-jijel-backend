@@ -15,6 +15,24 @@ class BusinessController extends Controller
 {
     use AuthorizesRequests;
 
+    /**
+     * Attributes managed through the nested `detail` payload. Any key present
+     * in the request but omitted from the payload is reset to null so a type
+     * change never leaves stale fields behind.
+     *
+     * @var list<string>
+     */
+    private const DETAIL_FIELDS = [
+        'average_price',
+        'price_unit',
+        'number_of_rooms',
+        'star_rating',
+        'cuisine_type',
+        'seating_capacity',
+        'amenities',
+        'services',
+    ];
+
     public function myBusinesses(Request $request): JsonResponse
     {
         $businesses = $request->user()->businesses()
@@ -24,6 +42,15 @@ class BusinessController extends Controller
             ->get();
 
         return response()->json($businesses);
+    }
+
+    public function myBusiness(Business $business): JsonResponse
+    {
+        $this->authorize('update', $business);
+
+        $business->load(['media', 'detail'])->loadCount('listings');
+
+        return response()->json($business);
     }
 
     public function index(Request $request): JsonResponse
@@ -88,9 +115,18 @@ class BusinessController extends Controller
     {
         $this->authorize('update', $business);
 
-        $business->update($request->validated());
+        $business->update($request->safe()->except('detail'));
 
-        return response()->json($business->load('media'));
+        if ($request->has('detail')) {
+            $attributes = array_merge(
+                array_fill_keys(self::DETAIL_FIELDS, null),
+                $request->validated('detail') ?? [],
+            );
+
+            $business->detail()->updateOrCreate([], $attributes);
+        }
+
+        return response()->json($business->load(['media', 'detail']));
     }
 
     public function destroy(Business $business): JsonResponse
