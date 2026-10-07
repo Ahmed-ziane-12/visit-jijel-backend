@@ -40,6 +40,11 @@ Route::prefix('v1')->group(function () {
             ->middleware('throttle:6,1')
             ->name('verification.send');
 
+        // Trips — generated from the planning wizard
+        Route::post('trips', [Api\TripController::class, 'store']);
+        Route::get('trips/{itinerary}', [Api\TripController::class, 'show']);
+        Route::get('trips/{itinerary}/recommendations', [Api\TripController::class, 'recommendations']);
+
         // Itineraries — full nested hierarchy
         Route::apiResource('itineraries', Api\ItineraryController::class);
         Route::apiResource('itineraries.days', Api\ItineraryDayController::class);

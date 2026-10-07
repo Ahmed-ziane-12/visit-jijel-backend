@@ -23,7 +23,7 @@ class ItineraryItem extends Model
         'item_type',
     ];
 
-    protected $appends = ['description', 'image_url'];
+    protected $appends = ['description', 'image_url', 'latitude', 'longitude'];
 
     public function getDescriptionAttribute(): ?string
     {
@@ -33,6 +33,33 @@ class ItineraryItem extends Model
     public function getImageUrlAttribute(): ?string
     {
         return $this->destination?->media?->first()?->secure_url;
+    }
+
+    /**
+     * Coordinates of the underlying entity so day maps can plot server items.
+     */
+    public function getLatitudeAttribute(): ?float
+    {
+        $latitude = match ($this->item_type) {
+            'destination' => $this->destination?->latitude,
+            'listing' => $this->listing?->business?->latitude,
+            'event' => $this->event?->latitude ?? $this->event?->business?->latitude,
+            default => null,
+        };
+
+        return $latitude !== null ? (float) $latitude : null;
+    }
+
+    public function getLongitudeAttribute(): ?float
+    {
+        $longitude = match ($this->item_type) {
+            'destination' => $this->destination?->longitude,
+            'listing' => $this->listing?->business?->longitude,
+            'event' => $this->event?->longitude ?? $this->event?->business?->longitude,
+            default => null,
+        };
+
+        return $longitude !== null ? (float) $longitude : null;
     }
 
     // ── Relationships ─────────────────────────────────────────

@@ -31,8 +31,9 @@ class ItineraryController extends Controller
 
         $itinerary->load([
             'days.items.destination',
-            'days.items.listing',
-            'days.items.event',
+            'days.items.listing.business',
+            'days.items.event.business',
+            'days.items.event.destination',
         ]);
 
         return response()->json($itinerary);

@@ -19,6 +19,8 @@ class Itinerary extends Model
         'start_date',
         'end_date',
         'visibility',
+        'status',
+        'preferences',
     ];
 
     protected function casts(): array
@@ -26,6 +28,7 @@ class Itinerary extends Model
         return [
             'start_date' => 'date',
             'end_date' => 'date',
+            'preferences' => 'array',
         ];
     }
 
