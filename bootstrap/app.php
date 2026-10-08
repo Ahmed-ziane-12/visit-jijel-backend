@@ -3,9 +3,11 @@
 use App\Http\Middleware\EnsureAdmin;
 use App\Http\Middleware\EnsureEmailIsVerified;
 use App\Http\Middleware\EnsureSuperAdmin;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Support\Facades\Broadcast;
 
@@ -37,6 +39,13 @@ return Application::configure(basePath: dirname(__DIR__))
         // page reload).
         $middleware->statefulApi();
 
+        // This API has no `login` route, so the framework's default guest
+        // redirect (route('login')) threw "Route [login] not defined" and
+        // turned every unauthenticated non-JSON request (browser, curl,
+        // Postman) into a 500 before an AuthenticationException was even
+        // built. Disable the redirect; withExceptions below answers 401 JSON.
+        $middleware->redirectGuestsTo(null);
+
         $middleware->alias([
             'verified' => EnsureEmailIsVerified::class,
             'admin' => EnsureAdmin::class,
@@ -57,5 +66,11 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // This API has no `login` route, so the framework's default guest
+        // redirect (route('login')) threw "Route [login] not defined" and
+        // turned every unauthenticated non-JSON request (browser, curl,
+        // Postman) into a 500. Always answer 401 JSON instead.
+        $exceptions->render(function (AuthenticationException $e, Request $request) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        });
     })->create();

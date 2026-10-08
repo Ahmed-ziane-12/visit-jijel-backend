@@ -18,6 +18,12 @@ it('blocks unauthenticated requests from admin routes', function () {
         ->assertStatus(401);
 });
 
+it('returns 401 for unauthenticated browser requests instead of a 500', function () {
+    $this->get('/admin/v1/stats', ['Accept' => 'text/html'])
+        ->assertStatus(401)
+        ->assertJson(['message' => 'Unauthenticated.']);
+});
+
 it('blocks non-admin users from admin routes', function () {
     Sanctum::actingAs(User::factory()->create());
 
