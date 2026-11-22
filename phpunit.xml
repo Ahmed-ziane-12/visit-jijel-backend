@@ -34,6 +34,12 @@
         <env name="DB_DATABASE" value="visitJijel_test"/>
         <env name="DB_USERNAME" value="ahmed"/>
         <env name="DB_PASSWORD" value="ahmed"/>
+        <!-- Dummy Cloudinary credentials: the SDK validates the config in its
+             constructor, so the media endpoints need syntactically valid
+             values even though no request ever leaves the test suite. -->
+        <env name="CLOUDINARY_CLOUD_NAME" value="test-cloud"/>
+        <env name="CLOUDINARY_API_KEY" value="123456789012345"/>
+        <env name="CLOUDINARY_API_SECRET" value="test-secret"/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>

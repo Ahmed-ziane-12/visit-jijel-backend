@@ -119,7 +119,7 @@ it('rejects non string amenities', function () {
 // ── Read ───────────────────────────────────────────────────────
 
 it('exposes the detail on the public business endpoint', function () {
-    $business = Business::factory()->create(['type' => 'restaurant']);
+    $business = Business::factory()->active()->verified()->create(['type' => 'restaurant']);
 
     BusinessDetail::factory()->create([
         'business_id' => $business->id,
@@ -134,7 +134,7 @@ it('exposes the detail on the public business endpoint', function () {
 });
 
 it('returns a null detail for businesses without one', function () {
-    $business = Business::factory()->create();
+    $business = Business::factory()->active()->verified()->create();
 
     $this->getJson("/api/v1/businesses/{$business->id}")
         ->assertOk()
