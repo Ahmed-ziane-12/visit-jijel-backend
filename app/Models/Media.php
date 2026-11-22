@@ -51,11 +51,6 @@ class Media extends Model
     }
 
     // ── Helpers ───────────────────────────────────────────────
-    public function delete(): ?bool
-    {
-        return parent::delete();
-    }
-
     public function isImage(): bool
     {
         return $this->resource_type === 'image';

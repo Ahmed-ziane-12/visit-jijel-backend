@@ -35,9 +35,4 @@ class ItineraryDay extends Model
     {
         return $this->hasMany(ItineraryItem::class)->orderBy('sort_order');
     }
-
-    public function delete(): ?bool
-    {
-        return parent::delete();
-    }
 }

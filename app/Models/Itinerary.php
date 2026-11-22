@@ -52,9 +52,4 @@ class Itinerary extends Model
     {
         return $this->hasMany(CalendarEvent::class);
     }
-
-    public function delete(): ?bool
-    {
-        return parent::delete();
-    }
 }

@@ -19,11 +19,6 @@ trait HasStatus
         return $query->where('status', 'draft');
     }
 
-    public function scopeArchived(Builder $query): Builder
-    {
-        return $query->where('status', 'archived');
-    }
-
     public function isPublished(): bool
     {
         return $this->status === 'published';
@@ -37,10 +32,5 @@ trait HasStatus
     public function publish(): bool
     {
         return $this->update(['status' => 'published']);
-    }
-
-    public function archive(): bool
-    {
-        return $this->update(['status' => 'archived']);
     }
 }

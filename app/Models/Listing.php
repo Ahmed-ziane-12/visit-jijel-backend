@@ -45,9 +45,4 @@ class Listing extends Model
     {
         return $this->hasMany(ItineraryItem::class);
     }
-
-    public function delete(): ?bool
-    {
-        return parent::delete();
-    }
 }

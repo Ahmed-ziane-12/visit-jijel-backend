@@ -47,9 +47,4 @@ class CalendarEvent extends Model
     {
         return $this->belongsTo(Event::class);
     }
-
-    public function delete(): ?bool
-    {
-        return parent::delete();
-    }
 }

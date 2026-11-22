@@ -87,21 +87,4 @@ trait HasMedia
         $media->update(['is_cover' => true, 'sort_order' => 0]);
     }
 
-    /**
-     * Detach and delete a media record.
-     * Note: does NOT delete from Cloudinary — handle that in a job or webhook.
-     */
-    public function detachMedia(string $cloudinaryPublicId): void
-    {
-        $this->media()->where('cloudinary_public_id', $cloudinaryPublicId)->delete();
-    }
-
-    public function clearMediaCollection(string $collection = 'default'): void
-    {
-        $mediaItems = $this->getMediaInCollection($collection)->get();
-
-        foreach ($mediaItems as $media) {
-            $media->delete();
-        }
-    }
 }

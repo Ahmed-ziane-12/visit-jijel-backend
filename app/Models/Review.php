@@ -56,9 +56,4 @@ class Review extends Model
     {
         return $this->listing ?? $this->destination ?? $this->event;
     }
-
-    public function delete(): ?bool
-    {
-        return parent::delete();
-    }
 }

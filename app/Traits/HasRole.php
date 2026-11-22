@@ -2,8 +2,6 @@
 
 namespace App\Traits;
 
-use Illuminate\Database\Eloquent\Builder;
-
 /**
  * @property string $role
  */
@@ -17,20 +15,5 @@ trait HasRole
     public function isClient(): bool
     {
         return $this->role === 'client';
-    }
-
-    public function hasRole(string $role): bool
-    {
-        return $this->role === $role;
-    }
-
-    public function scopeBusinessOwners(Builder $query): Builder
-    {
-        return $query->where('role', 'business_owner');
-    }
-
-    public function scopeClients(Builder $query): Builder
-    {
-        return $query->where('role', 'client');
     }
 }

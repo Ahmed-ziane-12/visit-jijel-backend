@@ -82,22 +82,4 @@ class ItineraryItem extends Model
     {
         return $this->belongsTo(Event::class);
     }
-
-    public function delete(): ?bool
-    {
-        return parent::delete();
-    }
-
-    /**
-     * Resolve the actual subject of this item regardless of type.
-     */
-    public function resolvable(): BelongsTo
-    {
-        return match ($this->item_type) {
-            'destination' => $this->destination(),
-            'listing' => $this->listing(),
-            'event' => $this->event(),
-            default => $this->destination(),
-        };
-    }
 }
