@@ -66,8 +66,10 @@ class DestinationController extends Controller
 
     public function destroy(Destination $destination, CloudinaryService $cloudinary): JsonResponse
     {
-        foreach ($destination->media as $media) {
-            $cloudinary->destroy($media->cloudinary_public_id);
+        if ($cloudinary->isConfigured()) {
+            foreach ($destination->media as $media) {
+                $cloudinary->destroy($media->cloudinary_public_id);
+            }
         }
 
         activity()

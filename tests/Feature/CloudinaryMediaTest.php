@@ -28,13 +28,15 @@ function mediaActingAs(User $user): User
 
 function mediaPayload(int $modelId, string $modelType = 'business'): array
 {
+    $folder = config("cloudinary.folders.{$modelType}");
+
     return [
         'model_type' => $modelType,
         'model_id' => $modelId,
         'collection' => 'gallery',
-        'cloudinary_public_id' => "jijel/{$modelType}s/test-{$modelId}",
-        'url' => 'https://res.cloudinary.com/test/image/upload/v1/test',
-        'secure_url' => 'https://res.cloudinary.com/test/image/upload/v1/test',
+        'cloudinary_public_id' => "{$folder}/test-{$modelId}",
+        'url' => 'https://res.cloudinary.com/test-cloud/image/upload/v1/test',
+        'secure_url' => 'https://res.cloudinary.com/test-cloud/image/upload/v1/test',
         'format' => 'jpg',
         'resource_type' => 'image',
     ];
@@ -70,6 +72,7 @@ it('destroys cloudinary files when a destination is deleted', function () {
     ]);
 
     $this->mock(CloudinaryService::class, function ($mock) {
+        $mock->shouldReceive('isConfigured')->andReturnTrue();
         $mock->shouldReceive('destroy')
             ->once()
             ->with('jijel/destinations/dest-1')
@@ -152,7 +155,7 @@ it('moves a newly selected cover to the front of the media list', function () {
     $this->assertDatabaseHas('media', [
         'model_type' => Business::class,
         'model_id' => $business->id,
-        'cloudinary_public_id' => "jijel/businesss/test-{$business->id}",
+        'cloudinary_public_id' => "jijel/businesses/test-{$business->id}",
         'is_cover' => true,
         'sort_order' => 0,
     ]);
@@ -224,6 +227,7 @@ it('denies setting a cover on someone elses media', function () {
 
 it('allows an owner to delete media from their own business', function () {
     $this->mock(CloudinaryService::class, function ($mock) {
+        $mock->shouldReceive('isConfigured')->andReturnTrue();
         $mock->shouldReceive('destroy')
             ->once()
             ->with('jijel/businesses/test-1')
@@ -262,6 +266,7 @@ it('denies media deletion by a non-owner', function () {
 
 it('allows an owner to delete media from their own listing', function () {
     $this->mock(CloudinaryService::class, function ($mock) {
+        $mock->shouldReceive('isConfigured')->andReturnTrue();
         $mock->shouldReceive('destroy')
             ->once()
             ->with('jijel/listings/test-1')
@@ -285,6 +290,7 @@ it('allows an owner to delete media from their own listing', function () {
 
 it('promotes the first remaining media to cover when the cover is deleted', function () {
     $this->mock(CloudinaryService::class, function ($mock) {
+        $mock->shouldReceive('isConfigured')->andReturnTrue();
         $mock->shouldReceive('destroy')
             ->once()
             ->with('jijel/businesses/cover-1')
@@ -331,6 +337,7 @@ it('promotes the first remaining media to cover when the cover is deleted', func
 
 it('does not promote media when deleting a non-cover item', function () {
     $this->mock(CloudinaryService::class, function ($mock) {
+        $mock->shouldReceive('isConfigured')->andReturnTrue();
         $mock->shouldReceive('destroy')
             ->once()
             ->with('jijel/businesses/other-1')
@@ -364,4 +371,97 @@ it('does not promote media when deleting a non-cover item', function () {
         'id' => $cover->id,
         'is_cover' => true,
     ]);
+});
+
+// ── Hardening ─────────────────────────────────────────────────
+
+it('rejects a signed public id outside the requested folder', function () {
+    mediaActingAs(mediaOwner());
+
+    $this->postJson('/api/v1/media/signature', [
+        'folder' => 'jijel/businesses',
+        'public_id' => 'jijel/destinations/smuggled',
+    ])->assertStatus(422)->assertJsonPath(
+        'message',
+        'The public id must live inside the selected folder.'
+    );
+
+    $this->postJson('/api/v1/media/signature', [
+        'folder' => 'jijel/businesses',
+        'public_id' => 'jijel/businesses/../destinations/smuggled',
+    ])->assertStatus(422);
+});
+
+it('accepts a signed public id inside the requested folder', function () {
+    mediaActingAs(mediaOwner());
+
+    $this->postJson('/api/v1/media/signature', [
+        'folder' => 'jijel/businesses',
+        'public_id' => 'jijel/businesses/legit',
+    ])->assertOk()->assertJsonPath('folder', 'jijel/businesses');
+});
+
+it('returns 503 when media uploads are not configured', function () {
+    mediaActingAs(mediaOwner());
+
+    config(['cloudinary.api_secret' => null]);
+
+    $this->postJson('/api/v1/media/signature', ['folder' => 'jijel/businesses'])
+        ->assertStatus(503);
+});
+
+it('rejects a stored public id from the wrong folder', function () {
+    $owner = mediaActingAs(mediaOwner());
+    $business = Business::factory()->create(['owner_id' => $owner->id]);
+
+    $this->postJson('/api/v1/media/store', [
+        ...mediaPayload($business->id),
+        'cloudinary_public_id' => 'jijel/listings/not-a-business',
+    ])->assertStatus(422);
+
+    $this->assertDatabaseCount('media', 0);
+});
+
+it('rejects media delivery urls outside the configured cloud', function () {
+    $owner = mediaActingAs(mediaOwner());
+    $business = Business::factory()->create(['owner_id' => $owner->id]);
+
+    $this->postJson('/api/v1/media/store', [
+        ...mediaPayload($business->id),
+        'secure_url' => 'https://evil.example.com/image.jpg',
+    ])->assertStatus(422)->assertJsonValidationErrors('secure_url');
+
+    $this->assertDatabaseCount('media', 0);
+});
+
+it('rejects unknown media collections', function () {
+    $owner = mediaActingAs(mediaOwner());
+    $business = Business::factory()->create(['owner_id' => $owner->id]);
+
+    $this->postJson('/api/v1/media/store', [
+        ...mediaPayload($business->id),
+        'collection' => 'anything',
+    ])->assertStatus(422)->assertJsonValidationErrors('collection');
+
+    $this->assertDatabaseCount('media', 0);
+});
+
+it('returns 503 when deleting media without cloudinary configuration', function () {
+    $this->mock(CloudinaryService::class, function ($mock) {
+        $mock->shouldReceive('isConfigured')->andReturnFalse();
+        $mock->shouldReceive('destroy')->never();
+    });
+
+    $owner = mediaActingAs(mediaOwner());
+    $business = Business::factory()->create(['owner_id' => $owner->id]);
+    $media = Media::factory()->create([
+        'model_type' => Business::class,
+        'model_id' => $business->id,
+        'cloudinary_public_id' => 'jijel/businesses/test-1',
+    ]);
+
+    $this->deleteJson('/api/v1/media/delete', ['media_id' => $media->id])
+        ->assertStatus(503);
+
+    $this->assertDatabaseHas('media', ['id' => $media->id]);
 });

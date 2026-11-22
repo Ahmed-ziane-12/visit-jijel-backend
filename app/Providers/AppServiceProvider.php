@@ -23,11 +23,26 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(CloudinaryService::class, function (): CloudinaryService {
+            $cloudName = config('cloudinary.cloud_name');
+            $apiKey = config('cloudinary.api_key');
+            $apiSecret = config('cloudinary.api_secret');
+
+            // Resolve a client-less service when the deployment has no
+            // Cloudinary credentials. The SDK validates its configuration in
+            // the constructor, so building it with empty values would make
+            // every media route (even ones that do not touch Cloudinary)
+            // throw a 500.
+            if (blank($cloudName) || blank($apiKey) || blank($apiSecret)) {
+                return new CloudinaryService;
+            }
+
             return new CloudinaryService(new Cloudinary([
                 'cloud' => [
-                    'cloud_name' => config('cloudinary.cloud_name'),
-                    'api_key' => config('cloudinary.api_key'),
-                    'api_secret' => config('cloudinary.api_secret'),
+                    'cloud_name' => $cloudName,
+                    'api_key' => $apiKey,
+                    'api_secret' => $apiSecret,
+                    'signature_algorithm' => config('cloudinary.signature_algorithm'),
+                    'signature_version' => 2,
                 ],
             ]));
         });

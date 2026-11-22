@@ -12,6 +12,7 @@ use App\Models\Post;
 use App\Models\Profile;
 use App\Models\User;
 use App\Services\CloudinaryService;
+use Cloudinary\Api\ApiUtils;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -19,13 +20,31 @@ use Illuminate\Validation\Rule;
 
 class CloudinaryController extends Controller
 {
-    private const ALLOWED_FOLDERS = [
-        'jijel/businesses',
-        'jijel/listings',
-        'jijel/events',
-        'jijel/destinations',
-        'jijel/profiles',
-        'jijel/posts',
+    /**
+     * Collections the frontend is allowed to write to. Keeping this explicit
+     * stops arbitrary values from ending up in the media table and in cover
+     * lookups.
+     */
+    private const ALLOWED_COLLECTIONS = [
+        'default',
+        'cover',
+        'covers',
+        'gallery',
+        'avatar',
+        'profiles',
+        'posts',
+    ];
+
+    /**
+     * Model type => owning class. Also defines the accepted model_type values.
+     */
+    private const MODEL_MAP = [
+        'destination' => Destination::class,
+        'business' => Business::class,
+        'listing' => Listing::class,
+        'event' => Event::class,
+        'profile' => Profile::class,
+        'post' => Post::class,
     ];
 
     /**
@@ -34,17 +53,32 @@ class CloudinaryController extends Controller
      */
     public function signature(Request $request): JsonResponse
     {
+        $folders = array_values(config('cloudinary.folders', []));
+
         $data = $request->validate([
-            'folder' => ['required', 'string', Rule::in(self::ALLOWED_FOLDERS)],
-            'public_id' => ['nullable', 'string'],
-            'transformation' => ['nullable', 'string', 'max:255'],
+            'folder' => ['required', 'string', Rule::in($folders)],
+            'public_id' => ['nullable', 'string', 'max:255', 'regex:~^[A-Za-z0-9_./-]+$~'],
+            'transformation' => ['nullable', 'string', 'max:255', 'regex:~^[A-Za-z0-9_,./-]+$~'],
         ]);
 
-        $timestamp = time();
-        $folder = $data['folder'];
         $cloudName = config('cloudinary.cloud_name');
         $apiKey = config('cloudinary.api_key');
         $apiSecret = config('cloudinary.api_secret');
+
+        if (blank($cloudName) || blank($apiKey) || blank($apiSecret)) {
+            return response()->json([
+                'message' => 'Media uploads are not configured.',
+            ], 503);
+        }
+
+        $timestamp = time();
+        $folder = $data['folder'];
+
+        if (isset($data['public_id']) && ! $this->publicIdBelongsToFolder($data['public_id'], $folder)) {
+            return response()->json([
+                'message' => 'The public id must live inside the selected folder.',
+            ], 422);
+        }
 
         $params = [
             'folder' => $folder,
@@ -52,21 +86,22 @@ class CloudinaryController extends Controller
         ];
 
         if ($request->filled('public_id')) {
-            $params['public_id'] = $request->input('public_id');
+            $params['public_id'] = $data['public_id'];
         }
 
         if ($request->filled('transformation')) {
-            $params['transformation'] = $request->input('transformation');
+            $params['transformation'] = $data['transformation'];
         }
 
-        // Sort params alphabetically — required by Cloudinary
-        ksort($params);
+        $algorithm = config('cloudinary.signature_algorithm');
 
-        $paramString = collect($params)
-            ->map(fn ($v, $k) => "{$k}={$v}")
-            ->implode('&');
+        if (! in_array($algorithm, ['sha1', 'sha256'], true)) {
+            $algorithm = 'sha1';
+        }
 
-        $signature = hash('sha256', $paramString.$apiSecret);
+        // Let the SDK build the signature with the account's algorithm and
+        // the URL-safe version of the parameter string.
+        $signature = ApiUtils::signParameters($params, $apiSecret, $algorithm, 2);
 
         return response()->json([
             'signature' => $signature,
@@ -85,35 +120,29 @@ class CloudinaryController extends Controller
     public function store(Request $request, CloudinaryService $cloudinary): JsonResponse
     {
         $data = $request->validate([
-            'model_type' => ['required', 'string'],  // e.g. "destination"
+            'model_type' => ['required', 'string', Rule::in(array_keys(self::MODEL_MAP))],
             'model_id' => ['required', 'integer'],
-            'collection' => ['required', 'string'],
+            'collection' => ['required', 'string', Rule::in(self::ALLOWED_COLLECTIONS)],
             'is_cover' => ['sometimes', 'boolean'],
-            'cloudinary_public_id' => ['required', 'string'],
-            'url' => ['required', 'url'],
-            'secure_url' => ['required', 'url'],
-            'format' => ['nullable', 'string'],
-            'resource_type' => ['nullable', 'string'],
-            'width' => ['nullable', 'integer'],
-            'height' => ['nullable', 'integer'],
-            'bytes' => ['nullable', 'integer'],
+            'cloudinary_public_id' => ['required', 'string', 'max:255', 'regex:~^[A-Za-z0-9_./-]+$~'],
+            'url' => ['required', 'string', 'max:2048', $this->cloudinaryUrlRule()],
+            'secure_url' => ['required', 'string', 'max:2048', $this->cloudinaryUrlRule()],
+            'format' => ['nullable', 'string', 'max:20', 'regex:~^[A-Za-z0-9]+$~'],
+            'resource_type' => ['nullable', 'string', Rule::in(['image', 'video', 'raw'])],
+            'width' => ['nullable', 'integer', 'min:0'],
+            'height' => ['nullable', 'integer', 'min:0'],
+            'bytes' => ['nullable', 'integer', 'min:0'],
         ]);
 
-        // Resolve the model class from a safe map — never trust raw user input
-        $modelMap = [
-            'destination' => Destination::class,
-            'listing' => Listing::class,
-            'business' => Business::class,
-            'event' => Event::class,
-            'profile' => Profile::class,
-            'post' => Post::class,
-        ];
+        $folder = config('cloudinary.folders.'.$data['model_type']);
 
-        if (! isset($modelMap[$data['model_type']])) {
-            return response()->json(['message' => 'Invalid model type.'], 422);
+        if (! is_string($folder) || ! $this->publicIdBelongsToFolder($data['cloudinary_public_id'], $folder)) {
+            return response()->json([
+                'message' => 'The public id does not match the selected model type.',
+            ], 422);
         }
 
-        $modelClass = $modelMap[$data['model_type']];
+        $modelClass = self::MODEL_MAP[$data['model_type']];
         $model = $modelClass::findOrFail($data['model_id']);
 
         if (! $this->canAttachMedia($request->user(), $data['model_type'], $model)) {
@@ -123,6 +152,12 @@ class CloudinaryController extends Controller
         // For client profiles, remove old media in the same collection
         // so only the latest profile/cover image is kept.
         if ($data['model_type'] === 'profile') {
+            if (! $cloudinary->isConfigured()) {
+                return response()->json([
+                    'message' => 'Media uploads are not configured.',
+                ], 503);
+            }
+
             $this->clearExistingMedia($model, $data['collection'], $cloudinary);
         }
 
@@ -173,6 +208,12 @@ class CloudinaryController extends Controller
             return response()->json(['message' => 'Unauthorized.'], 403);
         }
 
+        if (! $cloudinary->isConfigured()) {
+            return response()->json([
+                'message' => 'Media uploads are not configured.',
+            ], 503);
+        }
+
         if (! $cloudinary->destroy($media->cloudinary_public_id)) {
             return response()->json([
                 'message' => 'Failed to delete from Cloudinary.',
@@ -221,6 +262,57 @@ class CloudinaryController extends Controller
             $cloudinary->destroy($media->cloudinary_public_id);
             $media->delete();
         }
+    }
+
+    /**
+     * Ensure a public id lives inside the configured folder and cannot
+     * traverse out of it.
+     */
+    private function publicIdBelongsToFolder(string $publicId, string $folder): bool
+    {
+        $publicId = ltrim($publicId, '/');
+
+        if (str_contains($publicId, '..')) {
+            return false;
+        }
+
+        return str_starts_with($publicId, $folder.'/');
+    }
+
+    /**
+     * Only accept https URLs served by the configured Cloudinary cloud.
+     *
+     * @return \Closure(string, mixed, \Closure(string): void): void
+     */
+    private function cloudinaryUrlRule(): \Closure
+    {
+        return function (string $attribute, mixed $value, \Closure $fail): void {
+            if (! is_string($value) || ! $this->isCloudinaryUrl($value)) {
+                $fail('The :attribute must be a Cloudinary delivery URL.');
+            }
+        };
+    }
+
+    private function isCloudinaryUrl(string $url): bool
+    {
+        $parts = parse_url($url);
+
+        if (! is_array($parts) || ($parts['scheme'] ?? null) !== 'https') {
+            return false;
+        }
+
+        if (strtolower($parts['host'] ?? '') !== 'res.cloudinary.com') {
+            return false;
+        }
+
+        $cloudName = config('cloudinary.cloud_name');
+        $path = $parts['path'] ?? '';
+
+        if (! blank($cloudName) && ! str_starts_with($path, '/'.$cloudName.'/')) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
