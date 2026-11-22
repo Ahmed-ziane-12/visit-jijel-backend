@@ -6,6 +6,7 @@ use App\Traits\HasCoverImage;
 use App\Traits\HasLocation;
 use App\Traits\HasMedia;
 use App\Traits\HasReviews;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -59,8 +60,11 @@ class Destination extends Model
         return $this->hasMany(ItineraryItem::class);
     }
 
-    public function delete(): ?bool
+    /**
+     * Only active destinations are exposed by the public API.
+     */
+    public function scopeActive(Builder $query): Builder
     {
-        return parent::delete();
+        return $query->where('state', 'active');
     }
 }

@@ -31,6 +31,8 @@ class ListingController extends Controller
     // Nested route: /businesses/{business}/listings
     public function index(Request $request, Business $business): JsonResponse
     {
+        $this->ensureBusinessIsPublic($business);
+
         $listings = $business->listings()
             ->published()
             ->when($request->min_price, fn ($q) => $q->where('price', '>=', $request->min_price))
@@ -41,8 +43,16 @@ class ListingController extends Controller
         return response()->json($listings);
     }
 
-    public function show(Business $business, Listing $listing): JsonResponse
+    public function show(Request $request, Business $business, Listing $listing): JsonResponse
     {
+        $this->ensureListingBelongsToBusiness($business, $listing);
+
+        $viewer = $request->user('sanctum');
+        $canViewDraft = $viewer !== null
+            && ($viewer->isAdmin() || $viewer->id === $business->owner_id);
+
+        abort_unless($listing->isPublished() || $canViewDraft, 404);
+
         $listing->load([
             'media',
             'reviews' => fn ($q) => $q->where('is_approved', true)->with('user:id,name'),
@@ -62,6 +72,7 @@ class ListingController extends Controller
 
     public function update(UpdateListingRequest $request, Business $business, Listing $listing): JsonResponse
     {
+        $this->ensureListingBelongsToBusiness($business, $listing);
         $this->authorize('update', $listing);
 
         $listing->update($request->validated());
@@ -71,10 +82,21 @@ class ListingController extends Controller
 
     public function destroy(Business $business, Listing $listing): JsonResponse
     {
+        $this->ensureListingBelongsToBusiness($business, $listing);
         $this->authorize('delete', $listing);
 
         $listing->delete();
 
         return response()->json(['message' => 'Listing deleted successfully.']);
+    }
+
+    private function ensureListingBelongsToBusiness(Business $business, Listing $listing): void
+    {
+        abort_unless($listing->business_id === $business->id, 404);
+    }
+
+    private function ensureBusinessIsPublic(Business $business): void
+    {
+        abort_unless($business->is_active && $business->is_verified, 404);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\HasLocation;
 use App\Traits\HasMedia;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -74,8 +75,12 @@ class Business extends Model
         return $this->hasMany(Event::class);
     }
 
-    public function delete(): ?bool
+    /**
+     * A business is publicly visible only once an admin has verified and
+     * activated it.
+     */
+    public function scopeVisible(Builder $query): Builder
     {
-        return parent::delete();
+        return $query->where('is_active', true)->where('is_verified', true);
     }
 }

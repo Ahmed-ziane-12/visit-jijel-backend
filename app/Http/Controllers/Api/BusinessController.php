@@ -56,8 +56,7 @@ class BusinessController extends Controller
     public function index(Request $request): JsonResponse
     {
         $businesses = Business::query()
-            ->where('is_active', true)
-            ->where('is_verified', true)
+            ->visible()
             ->when($request->type, fn ($q) => $q->where('type', $request->type))
             ->when($request->wilaya, fn ($q) => $q->where('wilaya', $request->wilaya))
             ->when(
@@ -74,8 +73,15 @@ class BusinessController extends Controller
         return response()->json($businesses);
     }
 
-    public function show(Business $business): JsonResponse
+    public function show(Request $request, Business $business): JsonResponse
     {
+        $viewer = $request->user('sanctum');
+        $isVisible = $business->is_active && $business->is_verified;
+        $isOwnerOrAdmin = $viewer !== null
+            && ($viewer->isAdmin() || $viewer->id === $business->owner_id);
+
+        abort_unless($isVisible || $isOwnerOrAdmin, 404);
+
         $business->load([
             'owner:id,name',
             'detail',

@@ -28,6 +28,7 @@ class SearchController extends Controller
 
         if (in_array('destinations', $types)) {
             $results['destinations'] = Destination::query()
+                ->active()
                 ->where(fn ($query) => $query
                     ->where('name', 'ilike', "%{$q}%")
                     ->orWhere('description', 'ilike', "%{$q}%")
@@ -40,8 +41,7 @@ class SearchController extends Controller
 
         if (in_array('businesses', $types)) {
             $results['businesses'] = Business::query()
-                ->where('is_active', true)
-                ->where('is_verified', true)
+                ->visible()
                 ->where(fn ($query) => $query
                     ->where('name', 'ilike', "%{$q}%")
                     ->orWhere('description', 'ilike', "%{$q}%")

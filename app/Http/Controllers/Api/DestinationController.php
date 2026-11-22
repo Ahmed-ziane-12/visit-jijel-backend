@@ -19,14 +19,21 @@ class DestinationController extends Controller
                 fn ($q) => $q->nearby($request->latitude, $request->longitude, $request->radius)
             )
             ->with('media')
-            ->where('state', 'active')
+            ->active()
             ->get();
 
         return response()->json($destinations);
     }
 
-    public function show(Destination $destination): JsonResponse
+    public function show(Request $request, Destination $destination): JsonResponse
     {
+        $viewer = $request->user('sanctum');
+
+        abort_unless(
+            $destination->state === 'active' || $viewer?->isAdmin(),
+            404,
+        );
+
         $destination->load([
             'media',
             'reviews' => fn ($q) => $q->where('is_approved', true)->with([

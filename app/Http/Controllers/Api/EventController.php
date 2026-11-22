@@ -29,8 +29,14 @@ class EventController extends Controller
         return response()->json($events);
     }
 
-    public function show(Event $event): JsonResponse
+    public function show(Request $request, Event $event): JsonResponse
     {
+        $viewer = $request->user('sanctum');
+        $canViewUnpublished = $viewer !== null
+            && ($viewer->isAdmin() || $viewer->id === $event->created_by);
+
+        abort_unless($event->isPublished() || $canViewUnpublished, 404);
+
         $event->load([
             'business:id,name',
             'destination:id,name',
@@ -45,6 +51,7 @@ class EventController extends Controller
     public function store(StoreEventRequest $request): JsonResponse
     {
         $this->authorize('create', Event::class);
+        $this->ensureBusinessIsOwned($request);
 
         $event = $request->user()->createdEvents()->create($request->validated());
 
@@ -54,6 +61,7 @@ class EventController extends Controller
     public function update(UpdateEventRequest $request, Event $event): JsonResponse
     {
         $this->authorize('update', $event);
+        $this->ensureBusinessIsOwned($request);
 
         $event->update($request->validated());
 
@@ -67,5 +75,22 @@ class EventController extends Controller
         $event->delete();
 
         return response()->json(['message' => 'Event deleted successfully.']);
+    }
+
+    /**
+     * A business owner may only attach an event to one of their own
+     * businesses. Admins can attach events directly, matching the platform
+     * management behaviour.
+     */
+    private function ensureBusinessIsOwned(Request $request): void
+    {
+        if ($request->user()->isAdmin() || ! $request->filled('business_id')) {
+            return;
+        }
+
+        abort_unless(
+            $request->user()->businesses()->whereKey($request->input('business_id'))->exists(),
+            403,
+        );
     }
 }
