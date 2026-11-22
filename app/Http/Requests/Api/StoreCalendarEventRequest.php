@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Api;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreCalendarEventRequest extends FormRequest
 {
@@ -14,7 +15,12 @@ class StoreCalendarEventRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'itinerary_id' => ['nullable', 'exists:itineraries,id'],
+            'itinerary_id' => [
+                'nullable',
+                Rule::exists('itineraries', 'id')->where(
+                    fn ($query) => $query->where('user_id', $this->user()->id)
+                ),
+            ],
             'event_id' => ['nullable', 'exists:events,id'],
             'title' => ['required', 'string', 'max:200'],
             'notes' => ['nullable', 'string'],
