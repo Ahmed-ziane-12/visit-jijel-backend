@@ -17,13 +17,16 @@ class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable;
 
+    /**
+     * Privilege flags (is_admin, is_super_admin, must_reset_password) are
+     * deliberately NOT fillable. They are only written by trusted admin
+     * actions through forceFill(), so a stray $request->all() can never
+     * promote an account.
+     */
     protected $fillable = [
         'name',
         'email',
         'password',
-        'is_admin',
-        'is_super_admin',
-        'must_reset_password',
         'created_by',
     ];
 
@@ -152,11 +155,6 @@ class User extends Authenticatable implements MustVerifyEmail
     public function likes(): HasMany
     {
         return $this->hasMany(Like::class);
-    }
-
-    public function delete(): ?bool
-    {
-        return parent::delete();
     }
 
     public function sendEmailVerificationNotification(): void

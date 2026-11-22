@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use Laravel\Sanctum\TransientToken;
@@ -101,26 +102,31 @@ class AuthController extends Controller
         ]);
 
         // Check the 5 admin cap (excluding super admin)
-        $adminCount = User::where('is_admin', '=', true, 'and')
-            ->where('is_super_admin', '=', false, 'and')
-            ->count('*');
+        $adminCount = User::where('is_admin', true)
+            ->where('is_super_admin', false)
+            ->count();
 
         if ($adminCount >= 5) {
             return response()->json(['message' => 'Admin account limit reached (5 max).'], 422);
         }
 
-        $temporaryPassword = 'Admin@'.rand(1000, 9999);
+        $temporaryPassword = Str::password(20);
 
         $admin = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($temporaryPassword),
+        ]);
+
+        // Privilege flags and the verification timestamp are not mass
+        // assignable, so write them explicitly.
+        $admin->forceFill([
             'is_admin' => true,
             'is_super_admin' => false,
             'must_reset_password' => true,
             'email_verified_at' => now(),
             'created_by' => $request->user()->id,
-        ]);
+        ])->save();
 
         activity()
             ->causedBy($request->user())
@@ -145,10 +151,10 @@ class AuthController extends Controller
 
         $user = $request->user();
 
-        $user->update([
+        $user->forceFill([
             'password' => Hash::make($request->password),
             'must_reset_password' => false,
-        ]);
+        ])->save();
 
         activity()
             ->causedBy($user)
@@ -165,7 +171,7 @@ class AuthController extends Controller
             return response()->json(['message' => 'Unauthorized.'], 403);
         }
 
-        $admins = User::where('is_admin', '=', true, 'and')
+        $admins = User::where('is_admin', true)
             ->with('creator:id,name')
             ->get(['id', 'name', 'email', 'is_admin', 'is_super_admin', 'created_by', 'created_at']);
 

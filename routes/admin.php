@@ -24,15 +24,21 @@ Route::name('admin.')->prefix('admin/v1')->group(function () {
             Route::get('admins', [AuthController::class, 'listAdmins']);
             Route::post('admins', [AuthController::class, 'createAdmin']);
             Route::delete('admins/{user}', [AuthController::class, 'deleteAdmin']);
+
+            // Privileged user mutations. Keeping these out of the regular
+            // `users` resource stops ordinary admins from minting admins or
+            // deleting a super admin through the platform-management routes.
+            Route::post('users', [Admin\UserController::class, 'store'])->name('users.store');
+            Route::delete('users/{user}', [Admin\UserController::class, 'destroy'])->name('users.destroy');
         });
 
         // Platform management
-        Route::apiResource('users', Admin\UserController::class);
+        Route::apiResource('users', Admin\UserController::class)->except(['store', 'destroy']);
         Route::apiResource('businesses', Admin\BusinessController::class)->except(['store']);
         Route::apiResource('destinations', Admin\DestinationController::class);
         Route::apiResource('events', Admin\EventController::class)->except(['store']);
         Route::apiResource('reviews', Admin\ReviewController::class)->except(['store']);
-        Route::apiResource('plans', Admin\PlanController::class)->except(['store']);
+        Route::apiResource('plans', Admin\PlanController::class)->only(['index', 'show']);
 
         // Dashboard stats
         Route::get('stats', [Admin\AdminStatsController::class, 'index']);
