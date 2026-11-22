@@ -10,6 +10,7 @@ use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Http\Requests\Auth\UpdatePasswordRequest;
 use App\Http\Requests\Auth\UpdateProfileRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Auth\Events\Verified;
@@ -149,35 +150,7 @@ class AuthController extends Controller
         ]);
     }
 
-    public function verify(Request $request)
-    {
-        $user = User::findOrFail($request->id);
-
-        if (! hash_equals((string) $request->hash, sha1($user->getEmailForVerification()))) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Invalid verification link.',
-            ], 400);
-        }
-
-        if ($user->hasVerifiedEmail()) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Email already verified.',
-            ], 400);
-        }
-
-        if ($user->markEmailAsVerified()) {
-            event(new Verified($user));
-        }
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Email verified successfully!',
-        ]);
-    }
-
-    public function verifyEmail(Request $request, int $id, string $hash): JsonResponse
+    public function verifyEmail(int $id, string $hash): JsonResponse
     {
         $user = User::findOrFail($id);
 
@@ -292,16 +265,17 @@ class AuthController extends Controller
     //  PUBLIC PROFILE
     // ──────────────────────────────────────────────────────────
 
-    public function showProfile(User $user): JsonResponse
+    public function showProfile(Request $request, User $user): JsonResponse
     {
-        $isOwner = auth()->check() && auth()->id() === $user->id;
+        $viewer = $request->user('sanctum');
+        $isOwner = $viewer !== null && $viewer->id === $user->id;
 
-        $data = $user->load(['profile', 'profile.media']);
+        $user->load(['profile', 'profile.media']);
 
-        if (! $isOwner) {
-            $data->setHidden(array_merge($data->getHidden(), ['email']));
-        }
-
-        return response()->json($data);
+        // Whitelisted payload: internal admin/reset flags are never exposed,
+        // and the email address is only visible to the account owner.
+        return response()->json(
+            UserResource::make($user, $isOwner)->resolve($request)
+        );
     }
 }
