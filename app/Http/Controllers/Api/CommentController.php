@@ -54,9 +54,7 @@ class CommentController extends Controller
      */
     public function destroy(Comment $comment): JsonResponse
     {
-        if ($comment->user_id !== auth()->id()) {
-            return response()->json(['message' => 'Unauthorized.'], 403);
-        }
+        $this->authorize('delete', $comment);
 
         $comment->delete();
 

@@ -25,7 +25,6 @@ class StoreEventRequest extends FormRequest
             'latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
             'max_attendees' => ['nullable', 'integer', 'min:1'],
-            'cover_image' => ['nullable', 'string', 'max:255'],
             'status' => ['sometimes', 'in:draft,published,cancelled'],
         ];
     }

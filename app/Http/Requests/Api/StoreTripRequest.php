@@ -39,9 +39,14 @@ class StoreTripRequest extends FormRequest
         $startDate = $this->input('start_date');
 
         if (is_string($startDate) && $startDate !== '') {
-            $rules['end_date'][] = 'before_or_equal:'.Carbon::parse($startDate)
-                ->addDays(ItineraryGenerator::MAX_TRIP_DAYS - 1)
-                ->toDateString();
+            try {
+                $rules['end_date'][] = 'before_or_equal:'.Carbon::parse($startDate)
+                    ->addDays(ItineraryGenerator::MAX_TRIP_DAYS - 1)
+                    ->toDateString();
+            } catch (\Throwable) {
+                // Let the `date` rule report a 422 instead of throwing a 500
+                // before validation runs.
+            }
         }
 
         return $rules;

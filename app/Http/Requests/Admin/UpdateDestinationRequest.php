@@ -24,7 +24,6 @@ class UpdateDestinationRequest extends FormRequest
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
             'category' => ['sometimes', 'in:nature,historical,beach,urban,cultural,sport'],
             'arabic_category' => ['nullable', 'string', 'max:100'],
-            'cover_image' => ['nullable', 'string', 'max:255'],
             'is_featured' => ['sometimes', 'boolean'],
             'tags' => ['nullable', 'array'],
             'tags.*' => ['string'],

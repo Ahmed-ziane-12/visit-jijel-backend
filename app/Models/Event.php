@@ -38,7 +38,6 @@ class Event extends Model
         'latitude',
         'longitude',
         'max_attendees',
-        'cover_image',
         'status',
     ];
 
@@ -76,10 +75,5 @@ class Event extends Model
     public function calendarEvents(): HasMany
     {
         return $this->hasMany(CalendarEvent::class);
-    }
-
-    public function delete(): ?bool
-    {
-        return parent::delete();
     }
 }

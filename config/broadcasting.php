@@ -17,11 +17,6 @@ return [
                 'scheme' => env('PUSHER_SCHEME', 'https'),
                 'useTLS' => env('PUSHER_SCHEME', 'https') === 'https',
             ],
-            'client_options' => [
-                'curl_options' => [
-                    CURLOPT_SSL_VERIFYPEER => false,
-                ],
-            ],
         ],
 
         'log' => [

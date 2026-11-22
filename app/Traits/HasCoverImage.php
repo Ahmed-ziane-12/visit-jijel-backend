@@ -2,31 +2,26 @@
 
 namespace App\Traits;
 
-/**
- * @property string|null $cover_image
- */
 trait HasCoverImage
 {
+    /**
+     * Resolve the cover from the media table: an explicit cover first, then
+     * the first gallery item.
+     */
     public function getCoverImageUrlAttribute(): ?string
     {
-        // First check the dedicated cover_image column (for events/destinations)
-        if (! empty($this->cover_image)) {
-            return $this->cover_image;
+        if (! method_exists($this, 'media')) {
+            return null;
         }
 
-        // Fall back to the media table cover
-        if (method_exists($this, 'media')) {
-            $cover = $this->media()
-                ->where('is_cover', true)
-                ->first()
-                ?? $this->media()
-                    ->where('collection', 'gallery')
-                    ->orderBy('sort_order')
-                    ->first();
+        $cover = $this->media()
+            ->where('is_cover', true)
+            ->first()
+            ?? $this->media()
+                ->where('collection', 'gallery')
+                ->orderBy('sort_order')
+                ->first();
 
-            return $cover?->secure_url;
-        }
-
-        return null;
+        return $cover?->secure_url;
     }
 }

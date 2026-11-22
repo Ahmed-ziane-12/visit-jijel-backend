@@ -120,8 +120,11 @@ class LikeController extends Controller
         $dislikesCount = $model->likes()->where('type', 'dislike')->count();
 
         if ($model instanceof Post) {
-            $like = $model->likes()->latest()->first();
-            broadcast(new PostLiked($like, $likesCount, $dislikesCount));
+            // The post may have no reactions left after a removal, so the
+            // latest Like is intentionally nullable.
+            $like = $model->likes()->latest('id')->first();
+
+            broadcast(new PostLiked($model, $like, $likesCount, $dislikesCount));
         }
     }
 }

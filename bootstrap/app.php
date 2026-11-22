@@ -10,6 +10,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Support\Facades\Broadcast;
+use Illuminate\Support\Facades\Route;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -20,12 +21,13 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->prefix('')
                 ->group(base_path('routes/admin.php'));
 
-            if (! app()->configurationIsCached()) {
-                Broadcast::routes(['prefix' => 'api/broadcasting']);
-            }
+            // Always register the broadcasting routes. Guarding this with
+            // configurationIsCached() meant `route:cache` silently dropped
+            // them from the cached route file.
+            Broadcast::routes(['prefix' => 'api/broadcasting']);
         },
         commands: __DIR__.'/../routes/console.php',
-        channels: __DIR__.'/../routes/channels.php',
+        channels: __DIR__.'/../database/channels.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {

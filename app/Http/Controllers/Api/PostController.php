@@ -89,7 +89,7 @@ class PostController extends Controller
      */
     public function update(Request $request, Post $post): JsonResponse
     {
-        $this->authorize('delete', $post);
+        $this->authorize('update', $post);
 
         $validated = $request->validate([
             'body' => 'required|string|max:5000',

@@ -48,7 +48,7 @@ class AdminStatsController extends Controller
 
         $pendingList = Business::whereNull('is_verified')
             ->orWhere('is_verified', false)
-            ->with('user:id,name,email')
+            ->with('owner:id,name,email')
             ->orderBy('created_at', 'desc')
             ->take(10)
             ->get()
@@ -56,8 +56,8 @@ class AdminStatsController extends Controller
                 'id' => $b->id,
                 'name' => $b->name,
                 'type' => $b->type,
-                'owner' => $b->user?->name ?? 'N/A',
-                'owner_email' => $b->user?->email ?? '',
+                'owner' => $b->owner?->name ?? 'N/A',
+                'owner_email' => $b->owner?->email ?? '',
                 'created_at' => $b->created_at?->diffForHumans(),
             ]);
 
