@@ -5,12 +5,23 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        $password = Hash::make('password123');
+        $plainPassword = config('seeding.demo_user_password');
+
+        if (! $plainPassword) {
+            $plainPassword = Str::password(16);
+
+            $this->command?->warn(
+                "Generated demo user password (store it now): {$plainPassword}"
+            );
+        }
+
+        $password = Hash::make($plainPassword);
 
         // 3 business owners
         $owners = [

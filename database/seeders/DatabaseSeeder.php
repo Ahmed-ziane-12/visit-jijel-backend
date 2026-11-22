@@ -16,9 +16,14 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             SuperAdminSeeder::class,
-            UserSeeder::class,
             DestinationSeeder::class,
             PlanSeeder::class,
         ]);
+
+        // Demo accounts are for local/dev environments only. They must never
+        // be created on a production deployment.
+        if (! app()->environment('production')) {
+            $this->call(UserSeeder::class);
+        }
     }
 }
