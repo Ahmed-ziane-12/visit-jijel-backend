@@ -24,6 +24,7 @@ class ItineraryDayController extends Controller
     public function show(Itinerary $itinerary, ItineraryDay $day): JsonResponse
     {
         $this->authorize('view', $itinerary);
+        $this->ensureDayBelongsToItinerary($itinerary, $day);
 
         return response()->json($day->load('items'));
     }
@@ -40,6 +41,7 @@ class ItineraryDayController extends Controller
     public function update(UpdateItineraryDayRequest $request, Itinerary $itinerary, ItineraryDay $day): JsonResponse
     {
         $this->authorize('update', $itinerary);
+        $this->ensureDayBelongsToItinerary($itinerary, $day);
 
         $day->update($request->validated());
 
@@ -49,9 +51,20 @@ class ItineraryDayController extends Controller
     public function destroy(Itinerary $itinerary, ItineraryDay $day): JsonResponse
     {
         $this->authorize('update', $itinerary);
+        $this->ensureDayBelongsToItinerary($itinerary, $day);
 
         $day->delete();
 
         return response()->json(['message' => 'Day deleted successfully.']);
+    }
+
+    /**
+     * Route model binding is scoped, but this explicit check keeps the
+     * parent/child invariant even if the routes are ever registered without
+     * ->scoped().
+     */
+    private function ensureDayBelongsToItinerary(Itinerary $itinerary, ItineraryDay $day): void
+    {
+        abort_unless($day->itinerary_id === $itinerary->id, 404);
     }
 }

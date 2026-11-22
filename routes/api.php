@@ -45,10 +45,12 @@ Route::prefix('v1')->group(function () {
         Route::get('trips/{itinerary}', [Api\TripController::class, 'show']);
         Route::get('trips/{itinerary}/recommendations', [Api\TripController::class, 'recommendations']);
 
-        // Itineraries — full nested hierarchy
+        // Itineraries — full nested hierarchy. `scoped()` makes each child
+        // resolve through its parent, otherwise /itineraries/1/days/99 would
+        // happily bind a day that belongs to someone else's itinerary.
         Route::apiResource('itineraries', Api\ItineraryController::class);
-        Route::apiResource('itineraries.days', Api\ItineraryDayController::class);
-        Route::apiResource('itineraries.days.items', Api\ItineraryItemController::class);
+        Route::apiResource('itineraries.days', Api\ItineraryDayController::class)->scoped();
+        Route::apiResource('itineraries.days.items', Api\ItineraryItemController::class)->scoped();
 
         // Calendar
         Route::apiResource('calendar-events', Api\CalendarEventController::class);
@@ -62,7 +64,7 @@ Route::prefix('v1')->group(function () {
         Route::get('my-businesses/{business}', [Api\BusinessController::class, 'myBusiness']);
         Route::get('my-businesses/{business}/listings', [Api\ListingController::class, 'mine']);
         Route::apiResource('businesses', Api\BusinessController::class)->except(['index', 'show']);
-        Route::apiResource('businesses.listings', Api\ListingController::class)->except(['index', 'show']);
+        Route::apiResource('businesses.listings', Api\ListingController::class)->except(['index', 'show'])->scoped();
 
         // Events — business owner only
         Route::apiResource('events', Api\EventController::class)->except(['index', 'show']);

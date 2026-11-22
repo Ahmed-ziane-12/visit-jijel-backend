@@ -18,13 +18,23 @@ class ItineraryItemController extends Controller
     public function index(Itinerary $itinerary, ItineraryDay $day): JsonResponse
     {
         $this->authorize('view', $itinerary);
+        $this->ensureDayBelongsToItinerary($itinerary, $day);
 
         return response()->json($day->items()->with(['destination', 'listing', 'event'])->get());
+    }
+
+    public function show(Itinerary $itinerary, ItineraryDay $day, ItineraryItem $item): JsonResponse
+    {
+        $this->authorize('view', $itinerary);
+        $this->ensureItemBelongsToDay($itinerary, $day, $item);
+
+        return response()->json($item->load(['destination', 'listing', 'event']));
     }
 
     public function store(StoreItineraryItemRequest $request, Itinerary $itinerary, ItineraryDay $day): JsonResponse
     {
         $this->authorize('update', $itinerary);
+        $this->ensureDayBelongsToItinerary($itinerary, $day);
 
         $item = $day->items()->create($request->validated());
 
@@ -34,6 +44,7 @@ class ItineraryItemController extends Controller
     public function update(UpdateItineraryItemRequest $request, Itinerary $itinerary, ItineraryDay $day, ItineraryItem $item): JsonResponse
     {
         $this->authorize('update', $itinerary);
+        $this->ensureItemBelongsToDay($itinerary, $day, $item);
 
         $item->update($request->validated());
 
@@ -43,9 +54,21 @@ class ItineraryItemController extends Controller
     public function destroy(Itinerary $itinerary, ItineraryDay $day, ItineraryItem $item): JsonResponse
     {
         $this->authorize('update', $itinerary);
+        $this->ensureItemBelongsToDay($itinerary, $day, $item);
 
         $item->delete();
 
         return response()->json(['message' => 'Item deleted successfully.']);
+    }
+
+    private function ensureDayBelongsToItinerary(Itinerary $itinerary, ItineraryDay $day): void
+    {
+        abort_unless($day->itinerary_id === $itinerary->id, 404);
+    }
+
+    private function ensureItemBelongsToDay(Itinerary $itinerary, ItineraryDay $day, ItineraryItem $item): void
+    {
+        $this->ensureDayBelongsToItinerary($itinerary, $day);
+        abort_unless($item->itinerary_day_id === $day->id, 404);
     }
 }
