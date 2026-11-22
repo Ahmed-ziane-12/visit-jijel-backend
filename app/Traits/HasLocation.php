@@ -12,8 +12,13 @@ use Illuminate\Database\Eloquent\Builder;
 trait HasLocation
 {
     /**
-     * Scope to filter models within a radius (km) from a point.
-     * Uses the Haversine formula.
+     * Filter models within a radius (km) from a point using the Haversine
+     * formula.
+     *
+     * The distance expression is repeated in WHERE and ORDER BY instead of
+     * being referenced by its SELECT alias: PostgreSQL does not allow column
+     * aliases in WHERE/HAVING, and an alias in HAVING without GROUP BY would
+     * turn the query into an invalid aggregate.
      */
     public function scopeNearby(
         Builder $query,
@@ -21,38 +26,22 @@ trait HasLocation
         float $longitude,
         float $radiusKm = 10
     ): Builder {
-        return $query->selectRaw('
-                *,
-                (6371 * acos(
-                    cos(radians(?)) *
-                    cos(radians(latitude)) *
-                    cos(radians(longitude) - radians(?)) +
-                    sin(radians(?)) *
-                    sin(radians(latitude))
-                )) AS distance
-            ', [$latitude, $longitude, $latitude])
-            ->having('distance', '<=', $radiusKm)
-            ->orderBy('distance');
-    }
+        $expression = '(6371 * acos(least(1, greatest(-1,
+            cos(radians(?)) * cos(radians(latitude)) *
+            cos(radians(longitude) - radians(?)) +
+            sin(radians(?)) * sin(radians(latitude))
+        ))))';
 
-    /**
-     * Scope to filter by wilaya — only for models that have that column.
-     */
-    public function scopeInWilaya(Builder $query, string $wilaya): Builder
-    {
-        return $query->where('wilaya', $wilaya);
+        $bindings = [$latitude, $longitude, $latitude];
+
+        return $query
+            ->selectRaw("*, {$expression} AS distance", $bindings)
+            ->whereRaw("{$expression} <= ?", [...$bindings, $radiusKm])
+            ->orderByRaw("{$expression} ASC", $bindings);
     }
 
     public function hasCoordinates(): bool
     {
         return ! is_null($this->latitude) && ! is_null($this->longitude);
-    }
-
-    public function getCoordinates(): array
-    {
-        return [
-            'latitude' => $this->latitude,
-            'longitude' => $this->longitude,
-        ];
     }
 }
