@@ -16,7 +16,7 @@ class ActivityLogController extends Controller
         }
 
         $logs = Activity::query()
-            ->with('causer:id,name')
+            ->with(['causer:id,name', 'causer.profile.media'])
             ->when($request->log_name, fn ($q, $v) => $q->where('log_name', $v))
             ->when($request->event, fn ($q, $v) => $q->where('event', $v))
             ->when($request->date_from, fn ($q, $v) => $q->whereDate('created_at', '>=', $v))

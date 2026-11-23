@@ -14,11 +14,25 @@ class ItineraryDayController extends Controller
 {
     use AuthorizesRequests;
 
+    /**
+     * Item relations needed by the appended image/coordinate accessors.
+     *
+     * @var list<string>
+     */
+    private const ITEM_RELATIONS = [
+        'items.destination.media',
+        'items.listing.business',
+        'items.event.business',
+        'items.event.destination',
+    ];
+
     public function index(Itinerary $itinerary): JsonResponse
     {
         $this->authorize('view', $itinerary);
 
-        return response()->json($itinerary->days()->with('items')->get());
+        return response()->json(
+            $itinerary->days()->with(self::ITEM_RELATIONS)->get()
+        );
     }
 
     public function show(Itinerary $itinerary, ItineraryDay $day): JsonResponse
@@ -26,7 +40,7 @@ class ItineraryDayController extends Controller
         $this->authorize('view', $itinerary);
         $this->ensureDayBelongsToItinerary($itinerary, $day);
 
-        return response()->json($day->load('items'));
+        return response()->json($day->load(self::ITEM_RELATIONS));
     }
 
     public function store(StoreItineraryDayRequest $request, Itinerary $itinerary): JsonResponse

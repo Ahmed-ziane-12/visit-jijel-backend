@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\Itinerary;
 use App\Models\ItineraryDay;
 use App\Models\Listing;
+use App\Models\Post;
 use App\Models\Profile;
 use App\Models\User;
 use Laravel\Sanctum\Sanctum;
@@ -298,6 +299,25 @@ it('enforces the five admin account cap', function () {
     ])->assertStatus(422);
 
     $this->assertDatabaseMissing('users', ['email' => 'sixth@example.com']);
+});
+
+it('does not leak author account fields in public post feeds', function () {
+    $author = User::factory()->has(Profile::factory()->client())->create([
+        'email' => 'author@example.com',
+    ]);
+
+    Post::create([
+        'user_id' => $author->id,
+        'body' => 'Hello Jijel',
+    ]);
+
+    $response = $this->getJson("/api/v1/users/{$author->id}/posts")->assertOk();
+
+    expect($response->json('data.0.user.email'))->toBeNull()
+        ->and($response->json('data.0.user.is_admin'))->toBeNull()
+        ->and($response->json('data.0.user.is_super_admin'))->toBeNull()
+        ->and($response->json('data.0.user.must_reset_password'))->toBeNull()
+        ->and($response->json('data.0.user.name'))->toBe($author->name);
 });
 
 it('never mass assigns privilege flags', function () {

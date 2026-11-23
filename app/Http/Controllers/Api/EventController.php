@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StoreEventRequest;
 use App\Http\Requests\Api\UpdateEventRequest;
+use App\Http\Resources\EventResource;
 use App\Models\Event;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
@@ -24,7 +25,8 @@ class EventController extends Controller
             ->when($request->to, fn ($q) => $q->where('ends_at', '<=', $request->to))
             ->with(['business:id,name', 'destination:id,name', 'media'])
             ->orderBy('starts_at')
-            ->paginate(12);
+            ->paginate(12)
+            ->through(fn (Event $event) => EventResource::make($event)->resolve());
 
         return response()->json($events);
     }
@@ -41,11 +43,12 @@ class EventController extends Controller
             'business:id,name',
             'destination:id,name',
             'creator:id,name',
+            'creator.profile.media',
             'media',
-            'reviews' => fn ($q) => $q->where('is_approved', true)->with('user:id,name'),
+            'reviews' => fn ($q) => $q->where('is_approved', true)->with(['user:id,name', 'user.profile.media']),
         ]);
 
-        return response()->json($event);
+        return response()->json(new EventResource($event));
     }
 
     public function store(StoreEventRequest $request): JsonResponse
@@ -55,7 +58,7 @@ class EventController extends Controller
 
         $event = $request->user()->createdEvents()->create($request->validated());
 
-        return response()->json($event->load('media'), 201);
+        return response()->json(EventResource::make($event->load('media')), 201);
     }
 
     public function update(UpdateEventRequest $request, Event $event): JsonResponse
@@ -65,7 +68,7 @@ class EventController extends Controller
 
         $event->update($request->validated());
 
-        return response()->json($event->load('media'));
+        return response()->json(EventResource::make($event->load('media')));
     }
 
     public function destroy(Event $event): JsonResponse

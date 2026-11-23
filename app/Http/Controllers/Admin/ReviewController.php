@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ReviewResource;
 use App\Models\Review;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -12,7 +13,7 @@ class ReviewController extends Controller
     public function index(Request $request): JsonResponse
     {
         $reviews = Review::query()
-            ->with(['user:id,name'])
+            ->with(['user:id,name', 'user.profile.media'])
             ->when(
                 $request->has('approved'),
                 fn ($q) => $q->where('is_approved', $request->boolean('approved'))
@@ -21,14 +22,15 @@ class ReviewController extends Controller
             ->when($request->destination_id, fn ($q) => $q->where('destination_id', $request->destination_id))
             ->when($request->event_id, fn ($q) => $q->where('event_id', $request->event_id))
             ->orderByDesc('created_at')
-            ->paginate(20);
+            ->paginate(20)
+            ->through(fn (Review $review) => ReviewResource::make($review)->resolve());
 
         return response()->json($reviews);
     }
 
     public function show(Review $review): JsonResponse
     {
-        return response()->json($review->load('user:id,name'));
+        return response()->json(new ReviewResource($review->load(['user:id,name', 'user.profile.media'])));
     }
 
     // Approve or reject
@@ -51,7 +53,7 @@ class ReviewController extends Controller
             ])
             ->log('Updated review');
 
-        return response()->json($review);
+        return response()->json(new ReviewResource($review));
     }
 
     public function destroy(Review $review): JsonResponse

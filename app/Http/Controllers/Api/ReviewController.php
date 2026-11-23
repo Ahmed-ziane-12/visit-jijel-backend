@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StoreReviewRequest;
+use App\Http\Resources\ReviewResource;
 use App\Models\Review;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
@@ -22,7 +23,8 @@ class ReviewController extends Controller
             ->when($request->event_id, fn ($q) => $q->where('event_id', $request->event_id))
             ->with('user.profile.media')
             ->orderByDesc('created_at')
-            ->paginate(10);
+            ->paginate(10)
+            ->through(fn (Review $review) => ReviewResource::make($review)->resolve());
 
         return response()->json($reviews);
     }
@@ -31,7 +33,7 @@ class ReviewController extends Controller
     {
         $review = $request->user()->reviews()->create($request->validated());
 
-        return response()->json($review, 201);
+        return response()->json(new ReviewResource($review), 201);
     }
 
     public function destroy(Review $review): JsonResponse

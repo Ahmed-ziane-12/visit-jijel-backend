@@ -31,7 +31,7 @@ class TripController extends Controller
         $this->authorize('view', $itinerary);
 
         $itinerary->load([
-            'days.items.destination',
+            'days.items.destination.media',
             'days.items.listing.business',
             'days.items.event.business',
             'days.items.event.destination',

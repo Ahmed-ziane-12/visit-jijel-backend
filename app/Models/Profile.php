@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\MediaCollection;
 use App\Enums\UserRole;
 use App\Traits\HasMedia;
 use App\Traits\HasRole;
@@ -39,8 +40,16 @@ class Profile extends Model
 
     public function getAvatarAttribute(): ?string
     {
+        // Prefer the eager-loaded relation so serializing a list of profiles
+        // does not issue one query per row.
+        if ($this->relationLoaded('media')) {
+            return $this->media
+                ->firstWhere('collection', MediaCollection::Profiles)
+                ?->secure_url;
+        }
+
         return $this->media()
-            ->where('collection', 'profiles')
+            ->where('collection', MediaCollection::Profiles)
             ->first()
             ?->secure_url;
     }

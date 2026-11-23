@@ -22,7 +22,7 @@ class UserController extends Controller
     public function index(Request $request): JsonResponse
     {
         $query = User::query()
-            ->with('profile')
+            ->with('profile.media')
             ->when($request->role === 'super_admin', fn ($q) => $q->where('is_super_admin', true))
             ->when($request->role === 'admin', fn ($q) => $q->where('is_admin', true)->where('is_super_admin', false))
             ->when(in_array($request->role, ['business_owner', 'client'], true), fn ($q) => $q->whereHas('profile', fn ($q) => $q->where('role', $request->role)))
@@ -39,7 +39,7 @@ class UserController extends Controller
 
     public function show(User $user): JsonResponse
     {
-        $user->load(['profile', 'businesses', 'itineraries']);
+        $user->load(['profile.media', 'businesses', 'itineraries']);
 
         return response()->json($user);
     }
@@ -86,7 +86,7 @@ class UserController extends Controller
             ->withProperties(['email' => $user->email])
             ->log('Created user');
 
-        return response()->json($user->load('profile'), 201);
+        return response()->json($user->load('profile.media'), 201);
     }
 
     public function update(Request $request, User $user): JsonResponse
@@ -151,7 +151,7 @@ class UserController extends Controller
             ])
             ->log('Updated user');
 
-        return response()->json($user->fresh('profile'));
+        return response()->json($user->fresh('profile.media'));
     }
 
     public function destroy(Request $request, User $user): JsonResponse

@@ -145,6 +145,7 @@ class ItineraryGenerator
             ->where('state', 'active')
             ->whereNotNull('latitude')
             ->whereNotNull('longitude')
+            ->with('media')
             ->withAvg('approvedReviews', 'rating')
             ->withCount('approvedReviews')
             ->orderBy('id')
@@ -158,7 +159,11 @@ class ItineraryGenerator
                     ->whereNotNull('latitude')
                     ->whereNotNull('longitude');
             })
-            ->with(['business:id,name,type,latitude,longitude,is_active', 'business.detail:id,business_id,star_rating'])
+            ->with([
+                'business:id,name,type,latitude,longitude,is_active',
+                'business.detail:id,business_id,star_rating',
+                'media',
+            ])
             ->withAvg('approvedReviews', 'rating')
             ->withCount('approvedReviews')
             ->orderBy('id')
@@ -169,7 +174,11 @@ class ItineraryGenerator
             ->published()
             ->where('starts_at', '<=', $end->endOfDay()->toDateTimeString())
             ->where('ends_at', '>=', $start->startOfDay()->toDateTimeString())
-            ->with(['destination:id,latitude,longitude,category', 'business:id,type,latitude,longitude'])
+            ->with([
+                'destination:id,latitude,longitude,category',
+                'business:id,type,latitude,longitude',
+                'media',
+            ])
             ->withAvg('approvedReviews', 'rating')
             ->withCount('approvedReviews')
             ->orderBy('id')
@@ -494,7 +503,7 @@ class ItineraryGenerator
             }
 
             return $itinerary->load([
-                'days.items.destination',
+                'days.items.destination.media',
                 'days.items.listing.business',
                 'days.items.event.business',
                 'days.items.event.destination',

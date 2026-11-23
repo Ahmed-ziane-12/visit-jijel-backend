@@ -14,11 +14,25 @@ class ItineraryController extends Controller
 {
     use AuthorizesRequests;
 
+    /**
+     * Relations required to serialize itinerary days and items without
+     * lazy-loading: item images come from destination media and the
+     * latitude/longitude accessors read the underlying listing/event parent.
+     *
+     * @var list<string>
+     */
+    private const DETAIL_RELATIONS = [
+        'days.items.destination.media',
+        'days.items.listing.business',
+        'days.items.event.business',
+        'days.items.event.destination',
+    ];
+
     public function index(Request $request): JsonResponse
     {
         $itineraries = $request->user()
             ->itineraries()
-            ->with(['days.items', 'days.items.destination'])
+            ->with(self::DETAIL_RELATIONS)
             ->orderByDesc('created_at')
             ->paginate(10);
 
@@ -29,12 +43,7 @@ class ItineraryController extends Controller
     {
         $this->authorize('view', $itinerary);
 
-        $itinerary->load([
-            'days.items.destination',
-            'days.items.listing.business',
-            'days.items.event.business',
-            'days.items.event.destination',
-        ]);
+        $itinerary->load(self::DETAIL_RELATIONS);
 
         return response()->json($itinerary);
     }

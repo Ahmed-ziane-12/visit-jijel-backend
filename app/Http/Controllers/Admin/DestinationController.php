@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreDestinationRequest;
 use App\Http\Requests\Admin\UpdateDestinationRequest;
+use App\Http\Resources\DestinationResource;
 use App\Models\Destination;
 use App\Services\CloudinaryService;
 use Illuminate\Http\JsonResponse;
@@ -23,14 +24,14 @@ class DestinationController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
-        return response()->json($destinations);
+        return response()->json(DestinationResource::collection($destinations));
     }
 
     public function show(Destination $destination): JsonResponse
     {
-        $destination->load(['media', 'reviews.user', 'events']);
+        $destination->load(['media', 'reviews.user.profile.media', 'events']);
 
-        return response()->json($destination);
+        return response()->json(new DestinationResource($destination));
     }
 
     public function store(StoreDestinationRequest $request): JsonResponse
@@ -43,7 +44,7 @@ class DestinationController extends Controller
             ->event('created')
             ->log('Created destination');
 
-        return response()->json($destination, 201);
+        return response()->json(new DestinationResource($destination), 201);
     }
 
     public function update(UpdateDestinationRequest $request, Destination $destination): JsonResponse
@@ -61,7 +62,7 @@ class DestinationController extends Controller
             ])
             ->log('Updated destination');
 
-        return response()->json($destination);
+        return response()->json(new DestinationResource($destination));
     }
 
     public function destroy(Destination $destination, CloudinaryService $cloudinary): JsonResponse

@@ -65,6 +65,7 @@ class BusinessController extends Controller
             )
             ->with([
                 'owner:id,name',
+                'owner.profile.media',
                 'media',
                 'listings' => fn ($q) => $q->published(),
             ])
@@ -84,6 +85,7 @@ class BusinessController extends Controller
 
         $business->load([
             'owner:id,name',
+            'owner.profile.media',
             'detail',
             'media',
             'listings' => fn ($q) => $q->published()->with('media'),

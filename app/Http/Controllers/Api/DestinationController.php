@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Enums\DestinationState;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\DestinationResource;
 use App\Models\Destination;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -23,7 +24,7 @@ class DestinationController extends Controller
             ->active()
             ->get();
 
-        return response()->json($destinations);
+        return response()->json(DestinationResource::collection($destinations));
     }
 
     public function show(Request $request, Destination $destination): JsonResponse
@@ -43,6 +44,6 @@ class DestinationController extends Controller
             'events' => fn ($q) => $q->published()->orderBy('starts_at')->with('media'),
         ]);
 
-        return response()->json($destination);
+        return response()->json(new DestinationResource($destination));
     }
 }

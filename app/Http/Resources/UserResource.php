@@ -31,7 +31,7 @@ class UserResource extends JsonResource
             'role' => $this->role,
             'email' => $this->when($this->includePrivate, $this->email),
             'email_verified_at' => $this->when($this->includePrivate, $this->email_verified_at),
-            'profile' => $this->whenLoaded('profile'),
+            'profile' => $this->whenLoaded('profile', fn () => new ProfileResource($this->profile)),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

@@ -172,7 +172,7 @@ class AuthController extends Controller
         }
 
         $admins = User::where('is_admin', true)
-            ->with('creator:id,name')
+            ->with(['creator:id,name', 'creator.profile.media'])
             ->get(['id', 'name', 'email', 'is_admin', 'is_super_admin', 'created_by', 'created_at']);
 
         return response()->json($admins);
@@ -204,7 +204,7 @@ class AuthController extends Controller
     // ── Get current admin profile ─────────────────────────────
     public function profile(Request $request): JsonResponse
     {
-        $user = $request->user()->load(['profile']);
+        $user = $request->user()->load(['profile.media']);
 
         return response()->json($user);
     }
@@ -219,7 +219,7 @@ class AuthController extends Controller
 
         $request->user()->update($data);
 
-        return response()->json($request->user()->fresh(['profile']));
+        return response()->json($request->user()->fresh(['profile.media']));
     }
 
     // ── Change current admin password ─────────────────────────

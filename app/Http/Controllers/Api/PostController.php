@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Events\PostCreated;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StorePostRequest;
+use App\Http\Resources\PostResource;
 use App\Models\Post;
 use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -37,7 +38,8 @@ class PostController extends Controller
                 'shareable.media',
             ])
             ->latest()
-            ->paginate(15);
+            ->paginate(15)
+            ->through(fn (Post $post) => PostResource::make($post)->resolve());
 
         return response()->json($posts);
     }
@@ -63,7 +65,7 @@ class PostController extends Controller
             'shareable.media',
         ]);
 
-        return response()->json($post);
+        return response()->json(new PostResource($post));
     }
 
     /**
@@ -81,7 +83,7 @@ class PostController extends Controller
 
         broadcast(new PostCreated($post));
 
-        return response()->json($post, 201);
+        return response()->json(new PostResource($post), 201);
     }
 
     /**
@@ -99,7 +101,7 @@ class PostController extends Controller
 
         $post->load(['user.profile.media', 'media', 'shareable.media', 'likes', 'comments.user.profile.media']);
 
-        return response()->json($post);
+        return response()->json(new PostResource($post));
     }
 
     /**

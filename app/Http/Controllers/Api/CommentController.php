@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Events\CommentCreated;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StoreCommentRequest;
+use App\Http\Resources\CommentResource;
 use App\Models\Comment;
 use App\Models\Post;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -28,7 +29,7 @@ class CommentController extends Controller
 
         broadcast(new CommentCreated($comment));
 
-        return response()->json($comment, 201);
+        return response()->json(new CommentResource($comment), 201);
     }
 
     /**
@@ -46,7 +47,7 @@ class CommentController extends Controller
 
         broadcast(new CommentCreated($reply));
 
-        return response()->json($reply, 201);
+        return response()->json(new CommentResource($reply), 201);
     }
 
     /**

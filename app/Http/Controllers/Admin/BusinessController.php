@@ -14,7 +14,7 @@ class BusinessController extends Controller
     public function index(Request $request): JsonResponse
     {
         $businesses = Business::query()
-            ->with('owner:id,name')
+            ->with(['owner:id,name', 'owner.profile.media'])
             ->when($request->type, fn ($q) => $q->where('type', $request->type))
             ->when($request->verified, fn ($q) => $q->where('is_verified', $request->boolean('verified')))
             ->when($request->search, fn ($q) => $q->where('name', 'like', "%{$request->search}%"))
@@ -28,6 +28,7 @@ class BusinessController extends Controller
     {
         $business->load([
             'owner:id,name',
+            'owner.profile.media',
             'media',
             'listings' => fn ($q) => $q->published(),
         ]);
