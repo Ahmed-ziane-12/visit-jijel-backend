@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\Api;
 
+use App\Enums\EventStatus;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreEventRequest extends FormRequest
 {
@@ -25,7 +27,7 @@ class StoreEventRequest extends FormRequest
             'latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
             'max_attendees' => ['nullable', 'integer', 'min:1'],
-            'status' => ['sometimes', 'in:draft,published,cancelled'],
+            'status' => ['sometimes', Rule::enum(EventStatus::class)],
         ];
     }
 }

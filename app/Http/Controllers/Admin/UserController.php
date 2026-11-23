@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
@@ -105,7 +107,7 @@ class UserController extends Controller
         $data = $request->validate([
             'name' => ['sometimes', 'string', 'max:100'],
             'email' => ['sometimes', 'email', 'unique:users,email,'.$user->id],
-            'role' => ['sometimes', 'in:business_owner,client'],
+            'role' => ['sometimes', Rule::enum(UserRole::class)->only([UserRole::BusinessOwner, UserRole::Client])],
             'wilaya' => ['sometimes', 'string'],
             'commune' => ['sometimes', 'string'],
         ]);

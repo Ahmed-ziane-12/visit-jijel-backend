@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Enums\DestinationCategory;
+use App\Enums\DestinationState;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateDestinationRequest extends FormRequest
 {
@@ -22,12 +25,12 @@ class UpdateDestinationRequest extends FormRequest
             'arabic_address' => ['nullable', 'string'],
             'latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
-            'category' => ['sometimes', 'in:nature,historical,beach,urban,cultural,sport'],
+            'category' => ['sometimes', Rule::enum(DestinationCategory::class)],
             'arabic_category' => ['nullable', 'string', 'max:100'],
             'is_featured' => ['sometimes', 'boolean'],
             'tags' => ['nullable', 'array'],
             'tags.*' => ['string'],
-            'state' => ['sometimes', 'in:active,inactive'],
+            'state' => ['sometimes', Rule::enum(DestinationState::class)],
         ];
     }
 }

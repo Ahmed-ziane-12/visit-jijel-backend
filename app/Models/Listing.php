@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ListingStatus;
 use App\Traits\HasCoverImage;
 use App\Traits\HasMedia;
 use App\Traits\HasReviews;
@@ -33,6 +34,7 @@ class Listing extends Model
             'price' => 'decimal:2',
             'amenities' => 'array',
             'metadata' => 'array',
+            'status' => ListingStatus::class,
         ];
     }
 

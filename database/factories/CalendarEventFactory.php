@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\CalendarEventSource;
 use App\Models\CalendarEvent;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -24,7 +25,7 @@ class CalendarEventFactory extends Factory
             'starts_at' => now()->addDays(1),
             'ends_at' => now()->addDays(1)->addHour(),
             'all_day' => false,
-            'source' => 'manual',
+            'source' => CalendarEventSource::Manual,
         ];
     }
 }

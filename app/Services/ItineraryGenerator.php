@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Enums\ItineraryStatus;
+use App\Enums\ItineraryVisibility;
 use App\Models\Destination;
 use App\Models\Event;
 use App\Models\Itinerary;
@@ -177,7 +179,7 @@ class ItineraryGenerator
         $candidates = [];
 
         foreach ($destinations as $destination) {
-            $keywords = array_merge([$destination->category], $destination->tags ?? []);
+            $keywords = array_merge([$destination->category?->value], $destination->tags ?? []);
             $candidates[] = new ItineraryCandidate(
                 type: 'destination',
                 id: $destination->id,
@@ -189,14 +191,14 @@ class ItineraryGenerator
                 reviewCount: (int) ($destination->approved_reviews_count ?? 0),
                 featured: (bool) $destination->is_featured,
                 keywords: $this->normalizeKeywords($keywords),
-                category: $destination->category,
+                category: $destination->category?->value,
                 image: $destination->cover_image_url,
             );
         }
 
         foreach ($listings as $listing) {
             $business = $listing->business;
-            $businessKeyword = self::BUSINESS_TYPE_KEYWORDS[$business?->type] ?? null;
+            $businessKeyword = self::BUSINESS_TYPE_KEYWORDS[$business?->type?->value] ?? null;
             $candidates[] = new ItineraryCandidate(
                 type: 'listing',
                 id: $listing->id,
@@ -221,8 +223,8 @@ class ItineraryGenerator
                 continue;
             }
 
-            $category = $event->destination?->category
-                ?? self::BUSINESS_TYPE_KEYWORDS[$event->business?->type] ?? null;
+            $category = $event->destination?->category?->value
+                ?? self::BUSINESS_TYPE_KEYWORDS[$event->business?->type?->value] ?? null;
 
             $candidates[] = new ItineraryCandidate(
                 type: 'event',
@@ -460,8 +462,10 @@ class ItineraryGenerator
                 'title' => $input['title'] ?? 'My Trip',
                 'start_date' => $input['start_date'],
                 'end_date' => $input['end_date'],
-                'status' => $input['status'] ?? 'draft',
-                'visibility' => 'private',
+                'status' => isset($input['status'])
+                    ? ItineraryStatus::from($input['status'])
+                    : ItineraryStatus::Draft,
+                'visibility' => ItineraryVisibility::Private,
                 'preferences' => $input,
             ]);
 

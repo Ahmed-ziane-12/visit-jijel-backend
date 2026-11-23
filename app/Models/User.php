@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\UserRole;
 use App\Notifications\CustomVerifyEmail;
 use App\Notifications\QueuedResetPassword;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -77,18 +78,18 @@ class User extends Authenticatable implements MustVerifyEmail
             return 'admin';
         }
 
-        return $this->profile?->role ?? 'client';
+        return $this->profile?->role?->value ?? UserRole::Client->value;
     }
 
     // ── Role helpers (delegates to profile for clients/owners) ─
     public function isBusinessOwner(): bool
     {
-        return $this->profile?->role === 'business_owner';
+        return $this->profile?->role === UserRole::BusinessOwner;
     }
 
     public function isClient(): bool
     {
-        return $this->profile?->role === 'client';
+        return $this->profile?->role === UserRole::Client;
     }
 
     // ── Relationships ─────────────────────────────────────────

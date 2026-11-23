@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\DestinationState;
 use App\Http\Controllers\Controller;
 use App\Models\Destination;
 use Illuminate\Http\JsonResponse;
@@ -30,7 +31,7 @@ class DestinationController extends Controller
         $viewer = $request->user('sanctum');
 
         abort_unless(
-            $destination->state === 'active' || $viewer?->isAdmin(),
+            $destination->state === DestinationState::Active || $viewer?->isAdmin(),
             404,
         );
 

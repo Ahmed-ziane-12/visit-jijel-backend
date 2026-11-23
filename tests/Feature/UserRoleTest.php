@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\UserRole;
 use App\Models\Profile;
 use App\Models\User;
 use Laravel\Sanctum\Sanctum;
@@ -45,7 +46,7 @@ it('creates real admins from the user store endpoint', function () {
 
     expect($admin->isAdmin())->toBeTrue()
         ->and($admin->role)->toBe('admin')
-        ->and($admin->profile->role)->toBe('client');
+        ->and($admin->profile->role)->toBe(UserRole::Client);
 });
 
 // ── Role updates cannot grant admin status ────────────────────
@@ -61,7 +62,7 @@ it('rejects admin and super_admin roles on user update', function () {
     $this->putJson("/admin/v1/users/{$client->id}", ['role' => 'super_admin'])
         ->assertStatus(422);
 
-    expect($client->fresh()->profile->role)->toBe('client');
+    expect($client->fresh()->profile->role)->toBe(UserRole::Client);
 });
 
 it('still updates public roles to business_owner or client', function () {
@@ -72,7 +73,7 @@ it('still updates public roles to business_owner or client', function () {
     $this->putJson("/admin/v1/users/{$client->id}", ['role' => 'business_owner'])
         ->assertOk();
 
-    expect($client->fresh()->profile->role)->toBe('business_owner');
+    expect($client->fresh()->profile->role)->toBe(UserRole::BusinessOwner);
 });
 
 // ── Role filter ───────────────────────────────────────────────

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\ListingStatus;
 use App\Models\Business;
 use App\Models\Listing;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -26,13 +27,13 @@ class ListingFactory extends Factory
             'currency' => 'DZD',
             'amenities' => ['wifi', 'parking'],
             'capacity' => fake()->numberBetween(1, 20),
-            'status' => 'draft',
+            'status' => ListingStatus::Draft,
             'metadata' => [],
         ];
     }
 
     public function published(): static
     {
-        return $this->state(fn () => ['status' => 'published']);
+        return $this->state(fn () => ['status' => ListingStatus::Published]);
     }
 }

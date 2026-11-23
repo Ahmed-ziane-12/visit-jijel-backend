@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Enums\DestinationCategory;
+use App\Enums\DestinationState;
 use App\Models\Destination;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -23,10 +25,10 @@ class DestinationFactory extends Factory
             'address' => fake()->address(),
             'latitude' => fake()->latitude(),
             'longitude' => fake()->longitude(),
-            'category' => fake()->randomElement(['nature', 'historical', 'beach', 'urban', 'cultural', 'sport']),
+            'category' => fake()->randomElement(DestinationCategory::cases()),
             'is_featured' => false,
             'tags' => [],
-            'state' => 'active',
+            'state' => DestinationState::Active,
         ];
     }
 }

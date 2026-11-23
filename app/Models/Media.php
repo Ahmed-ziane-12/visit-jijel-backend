@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\MediaCollection;
+use App\Enums\MediaResourceType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -41,6 +43,8 @@ class Media extends Model
             'size' => 'integer',
             'sort_order' => 'integer',
             'created_at' => 'datetime',
+            'collection' => MediaCollection::class,
+            'resource_type' => MediaResourceType::class,
         ];
     }
 
@@ -53,12 +57,12 @@ class Media extends Model
     // ── Helpers ───────────────────────────────────────────────
     public function isImage(): bool
     {
-        return $this->resource_type === 'image';
+        return $this->resource_type === MediaResourceType::Image;
     }
 
     public function isVideo(): bool
     {
-        return $this->resource_type === 'video';
+        return $this->resource_type === MediaResourceType::Video;
     }
 
     /**

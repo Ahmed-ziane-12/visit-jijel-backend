@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\ItineraryVisibility;
 use App\Models\Itinerary;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -24,7 +25,7 @@ class ItineraryFactory extends Factory
             'notes' => fake()->paragraph(),
             'start_date' => now()->addDays(1),
             'end_date' => now()->addDays(5),
-            'visibility' => 'private',
+            'visibility' => ItineraryVisibility::Private,
         ];
     }
 }

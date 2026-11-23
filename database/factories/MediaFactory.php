@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Enums\MediaCollection;
+use App\Enums\MediaResourceType;
 use App\Models\Business;
 use App\Models\Media;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -25,8 +27,8 @@ class MediaFactory extends Factory
             'url' => 'https://res.cloudinary.com/test/image/upload/v1/test',
             'secure_url' => 'https://res.cloudinary.com/test/image/upload/v1/test',
             'format' => 'jpg',
-            'resource_type' => 'image',
-            'collection' => 'gallery',
+            'resource_type' => MediaResourceType::Image,
+            'collection' => MediaCollection::Gallery,
             'is_cover' => false,
             'sort_order' => 0,
         ];

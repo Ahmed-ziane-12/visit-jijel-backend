@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\MediaCollection;
 use App\Http\Controllers\Controller;
 use App\Models\Business;
 use App\Models\Destination;
@@ -20,21 +21,6 @@ use Illuminate\Validation\Rule;
 
 class CloudinaryController extends Controller
 {
-    /**
-     * Collections the frontend is allowed to write to. Keeping this explicit
-     * stops arbitrary values from ending up in the media table and in cover
-     * lookups.
-     */
-    private const ALLOWED_COLLECTIONS = [
-        'default',
-        'cover',
-        'covers',
-        'gallery',
-        'avatar',
-        'profiles',
-        'posts',
-    ];
-
     /**
      * Model type => owning class. Also defines the accepted model_type values.
      */
@@ -122,7 +108,7 @@ class CloudinaryController extends Controller
         $data = $request->validate([
             'model_type' => ['required', 'string', Rule::in(array_keys(self::MODEL_MAP))],
             'model_id' => ['required', 'integer'],
-            'collection' => ['required', 'string', Rule::in(self::ALLOWED_COLLECTIONS)],
+            'collection' => ['required', Rule::enum(MediaCollection::class)],
             'is_cover' => ['sometimes', 'boolean'],
             'cloudinary_public_id' => ['required', 'string', 'max:255', 'regex:~^[A-Za-z0-9_./-]+$~'],
             'url' => ['required', 'string', 'max:2048', $this->cloudinaryUrlRule()],
@@ -240,7 +226,7 @@ class CloudinaryController extends Controller
         $replacement = Media::query()
             ->where('model_type', $deleted->model_type)
             ->where('model_id', $deleted->model_id)
-            ->where('collection', $deleted->collection)
+            ->where('collection', $deleted->collection->value)
             ->orderBy('sort_order')
             ->orderBy('id')
             ->first();

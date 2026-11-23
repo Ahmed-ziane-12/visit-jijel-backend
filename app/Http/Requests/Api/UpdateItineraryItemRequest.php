@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\Api;
 
+use App\Enums\ItineraryItemType;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateItineraryItemRequest extends FormRequest
 {
@@ -22,7 +24,7 @@ class UpdateItineraryItemRequest extends FormRequest
             'start_time' => ['nullable', 'date_format:H:i'],
             'end_time' => ['nullable', 'date_format:H:i', 'after:start_time'],
             'sort_order' => ['sometimes', 'integer', 'min:0'],
-            'item_type' => ['sometimes', 'in:destination,listing,event,custom'],
+            'item_type' => ['sometimes', Rule::enum(ItineraryItemType::class)],
         ];
     }
 }

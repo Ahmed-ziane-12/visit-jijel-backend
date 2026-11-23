@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\Api;
 
+use App\Enums\ListingStatus;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreListingRequest extends FormRequest
 {
@@ -21,7 +23,7 @@ class StoreListingRequest extends FormRequest
             'amenities' => ['nullable', 'array'],
             'amenities.*' => ['string'],
             'capacity' => ['nullable', 'integer', 'min:1'],
-            'status' => ['sometimes', 'in:draft,published,archived'],
+            'status' => ['sometimes', Rule::enum(ListingStatus::class)],
             'metadata' => ['nullable', 'array'],
         ];
     }

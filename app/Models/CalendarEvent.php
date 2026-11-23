@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\CalendarEventSource;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -29,6 +30,7 @@ class CalendarEvent extends Model
             'starts_at' => 'datetime',
             'ends_at' => 'datetime',
             'all_day' => 'boolean',
+            'source' => CalendarEventSource::class,
         ];
     }
 

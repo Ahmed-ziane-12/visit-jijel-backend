@@ -77,7 +77,7 @@ trait HasMedia
      */
     public function setCover(Media $media): void
     {
-        $this->getMediaInCollection($media->collection)
+        $this->getMediaInCollection($media->collection->value)
             ->whereKeyNot($media->getKey())
             ->update([
                 'is_cover' => false,
@@ -86,5 +86,4 @@ trait HasMedia
 
         $media->update(['is_cover' => true, 'sort_order' => 0]);
     }
-
 }

@@ -2,9 +2,11 @@
 
 namespace App\Http\Requests\Api;
 
+use App\Enums\ItineraryStatus;
 use App\Services\ItineraryGenerator;
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreTripRequest extends FormRequest
 {
@@ -29,7 +31,7 @@ class StoreTripRequest extends FormRequest
             'preferences' => ['sometimes', 'array', 'max:6'],
             'preferences.*' => ['string', 'in:beaches,history,nature,food,adventure,city'],
             'accommodation' => ['sometimes', 'in:booked,notBooked'],
-            'status' => ['sometimes', 'in:draft,published'],
+            'status' => ['sometimes', Rule::enum(ItineraryStatus::class)],
             'budget' => ['sometimes', 'array'],
             'budget.budgetType' => ['required_with:budget', 'string', 'in:budget,standard,luxury,custom'],
             'budget.customBudget' => ['nullable', 'numeric', 'min:0'],

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\BusinessType;
 use App\Traits\HasLocation;
 use App\Traits\HasMedia;
 use Illuminate\Database\Eloquent\Builder;
@@ -48,6 +49,7 @@ class Business extends Model
     protected function casts(): array
     {
         return [
+            'type' => BusinessType::class,
             'latitude' => 'decimal:7',
             'longitude' => 'decimal:7',
             'is_verified' => 'boolean',

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Api;
 
+use App\Enums\BusinessType;
 use App\Enums\PriceUnit;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -19,7 +20,7 @@ class StoreBusinessRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'type' => ['required', 'in:restaurant,touristic_agency,real_estate_agency,hotel'],
+            'type' => ['required', Rule::enum(BusinessType::class)],
             'name' => ['required', 'string', 'max:150'],
             'description' => ['nullable', 'string'],
             'phone' => ['nullable', 'string', 'max:20'],

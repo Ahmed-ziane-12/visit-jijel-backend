@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\DestinationCategory;
 use App\Models\Destination;
 use Illuminate\Database\Seeder;
 
@@ -17,7 +18,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Sidi Abdelaziz',
                 'latitude' => 36.853261,
                 'longitude' => 6.051473,
-                'category' => 'beach',
+                'category' => DestinationCategory::Beach,
                 'tags' => ['beach', 'swimming', 'jijel', 'chekfa'],
             ],
             [
@@ -26,7 +27,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'El Aouana',
                 'latitude' => 36.7870251,
                 'longitude' => 5.651271,
-                'category' => 'beach',
+                'category' => DestinationCategory::Beach,
                 'tags' => ['beach', 'swimming', 'jijel', 'el_aouana'],
             ],
             [
@@ -35,7 +36,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Kheiri Oued Adjoul',
                 'latitude' => 36.8849,
                 'longitude' => 6.1392,
-                'category' => 'beach',
+                'category' => DestinationCategory::Beach,
                 'tags' => ['beach', 'swimming', 'jijel', 'el_ancer'],
             ],
             [
@@ -44,7 +45,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Jijel centre-ville',
                 'latitude' => 36.8117,
                 'longitude' => 5.773,
-                'category' => 'beach',
+                'category' => DestinationCategory::Beach,
                 'tags' => ['beach', 'swimming', 'jijel', 'jijel_centre'],
             ],
             [
@@ -53,7 +54,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Jijel',
                 'latitude' => 36.8166,
                 'longitude' => 5.7666,
-                'category' => 'beach',
+                'category' => DestinationCategory::Beach,
                 'tags' => ['beach', 'swimming', 'jijel', 'jijel_centre'],
             ],
             [
@@ -62,7 +63,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Taher',
                 'latitude' => 36.82329,
                 'longitude' => 5.907,
-                'category' => 'beach',
+                'category' => DestinationCategory::Beach,
                 'tags' => ['beach', 'swimming', 'jijel', 'taher'],
             ],
             [
@@ -71,7 +72,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'El Aouana',
                 'latitude' => 36.714,
                 'longitude' => 5.550,
-                'category' => 'beach',
+                'category' => DestinationCategory::Beach,
                 'tags' => ['beach', 'swimming', 'jijel', 'el_aouana'],
             ],
             [
@@ -80,7 +81,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'El Aouana',
                 'latitude' => 36.79301,
                 'longitude' => 5.654,
-                'category' => 'beach',
+                'category' => DestinationCategory::Beach,
                 'tags' => ['beach', 'swimming', 'jijel', 'el_aouana'],
             ],
             [
@@ -89,7 +90,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'El Aouana',
                 'latitude' => 36.7589,
                 'longitude' => 5.5448,
-                'category' => 'beach',
+                'category' => DestinationCategory::Beach,
                 'tags' => ['beach', 'swimming', 'jijel', 'el_aouana'],
             ],
             [
@@ -98,7 +99,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Jijel',
                 'latitude' => 36.81922,
                 'longitude' => 5.71293,
-                'category' => 'beach',
+                'category' => DestinationCategory::Beach,
                 'tags' => ['beach', 'swimming', 'jijel', 'jijel_centre'],
             ],
             [
@@ -107,7 +108,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Jijel',
                 'latitude' => 36.81849,
                 'longitude' => 5.70538,
-                'category' => 'beach',
+                'category' => DestinationCategory::Beach,
                 'tags' => ['beach', 'swimming', 'jijel', 'jijel_centre'],
             ],
             [
@@ -116,7 +117,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'El Aouana',
                 'latitude' => 36.77676,
                 'longitude' => 5.6102,
-                'category' => 'beach',
+                'category' => DestinationCategory::Beach,
                 'tags' => ['beach', 'swimming', 'jijel', 'el_aouana'],
             ],
             [
@@ -125,7 +126,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Jijel centre-ville',
                 'latitude' => 36.78442,
                 'longitude' => 5.97236,
-                'category' => 'beach',
+                'category' => DestinationCategory::Beach,
                 'tags' => ['beach', 'swimming', 'jijel', 'jijel_centre'],
             ],
             [
@@ -134,7 +135,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Jijel',
                 'latitude' => 36.8000,
                 'longitude' => 5.7667,
-                'category' => 'beach',
+                'category' => DestinationCategory::Beach,
                 'tags' => ['beach', 'swimming', 'jijel', 'jijel_centre'],
             ],
             [
@@ -143,7 +144,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Emir Abdel Kader',
                 'latitude' => null,
                 'longitude' => null,
-                'category' => 'beach',
+                'category' => DestinationCategory::Beach,
                 'tags' => ['beach', 'swimming', 'jijel', 'taher'],
             ],
             [
@@ -152,7 +153,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Sidi Abdelaziz',
                 'latitude' => 36.86437,
                 'longitude' => 6.06860,
-                'category' => 'beach',
+                'category' => DestinationCategory::Beach,
                 'tags' => ['beach', 'swimming', 'jijel', 'chekfa'],
             ],
             [
@@ -161,7 +162,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'El Kennar',
                 'latitude' => 36.8058,
                 'longitude' => 5.9287,
-                'category' => 'beach',
+                'category' => DestinationCategory::Beach,
                 'tags' => ['beach', 'swimming', 'jijel', 'chekfa'],
             ],
             [
@@ -170,7 +171,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'El Kennar',
                 'latitude' => 36.82472,
                 'longitude' => 5.95907,
-                'category' => 'beach',
+                'category' => DestinationCategory::Beach,
                 'tags' => ['beach', 'swimming', 'jijel', 'chekfa'],
             ],
             [
@@ -179,7 +180,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Kheiri Oued Adjoul',
                 'latitude' => 36.89,
                 'longitude' => 6.14,
-                'category' => 'beach',
+                'category' => DestinationCategory::Beach,
                 'tags' => ['beach', 'swimming', 'jijel', 'el_ancer'],
             ],
             [
@@ -188,7 +189,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'El Aouana',
                 'latitude' => 36.79769,
                 'longitude' => 5.67398,
-                'category' => 'beach',
+                'category' => DestinationCategory::Beach,
                 'tags' => ['beach', 'swimming', 'jijel', 'el_aouana'],
             ],
             [
@@ -197,7 +198,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Sidi Abdelaziz',
                 'latitude' => 36.7842,
                 'longitude' => 5.9083,
-                'category' => 'beach',
+                'category' => DestinationCategory::Beach,
                 'tags' => ['beach', 'swimming', 'jijel', 'chekfa'],
             ],
             [
@@ -206,7 +207,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Ziama Mansouriah',
                 'latitude' => 36.6632,
                 'longitude' => 5.461399,
-                'category' => 'beach',
+                'category' => DestinationCategory::Beach,
                 'tags' => ['beach', 'swimming', 'jijel', 'ziama_mansouriah'],
             ],
             [
@@ -215,7 +216,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Ziama Mansouriah',
                 'latitude' => 36.7078,
                 'longitude' => 5.54176,
-                'category' => 'beach',
+                'category' => DestinationCategory::Beach,
                 'tags' => ['beach', 'swimming', 'jijel', 'ziama_mansouriah'],
             ],
             [
@@ -224,7 +225,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Ziama Mansouriah',
                 'latitude' => 36.6639,
                 'longitude' => 5.45904,
-                'category' => 'beach',
+                'category' => DestinationCategory::Beach,
                 'tags' => ['beach', 'swimming', 'jijel', 'ziama_mansouriah'],
             ],
             [
@@ -233,7 +234,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Ziama Mansouriah',
                 'latitude' => 36.6575,
                 'longitude' => 5.4336,
-                'category' => 'beach',
+                'category' => DestinationCategory::Beach,
                 'tags' => ['beach', 'swimming', 'jijel', 'ziama_mansouriah'],
             ],
             [
@@ -242,7 +243,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Ziama Mansouriah',
                 'latitude' => 36.6575,
                 'longitude' => 5.4542,
-                'category' => 'beach',
+                'category' => DestinationCategory::Beach,
                 'tags' => ['beach', 'swimming', 'jijel', 'ziama_mansouriah'],
             ],
             [
@@ -251,7 +252,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Ziama Mansouriah',
                 'latitude' => 36.69599,
                 'longitude' => 5.52741,
-                'category' => 'beach',
+                'category' => DestinationCategory::Beach,
                 'tags' => ['beach', 'swimming', 'jijel', 'ziama_mansouriah'],
             ],
 
@@ -262,7 +263,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'El Aouana',
                 'latitude' => 36.7,
                 'longitude' => 5.61667,
-                'category' => 'nature',
+                'category' => DestinationCategory::Nature,
                 'tags' => ['forest', 'nature', 'jijel', 'el_aouana'],
             ],
             [
@@ -271,7 +272,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Djimla',
                 'latitude' => 36.5801,
                 'longitude' => 5.8843,
-                'category' => 'nature',
+                'category' => DestinationCategory::Nature,
                 'tags' => ['forest', 'nature', 'jijel', 'djimla'],
             ],
             [
@@ -280,7 +281,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Texenna',
                 'latitude' => 36.63637,
                 'longitude' => 5.71035,
-                'category' => 'nature',
+                'category' => DestinationCategory::Nature,
                 'tags' => ['forest', 'nature', 'jijel', 'texenna'],
             ],
             [
@@ -289,7 +290,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Texenna',
                 'latitude' => 36.77100,
                 'longitude' => 5.813,
-                'category' => 'nature',
+                'category' => DestinationCategory::Nature,
                 'tags' => ['forest', 'nature', 'jijel', 'texenna'],
             ],
             [
@@ -298,7 +299,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'El Milia',
                 'latitude' => 36.75000,
                 'longitude' => 5.9500,
-                'category' => 'nature',
+                'category' => DestinationCategory::Nature,
                 'tags' => ['forest', 'nature', 'jijel', 'el_milia'],
             ],
             [
@@ -307,7 +308,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Djimla',
                 'latitude' => 36.6046,
                 'longitude' => 5.92205,
-                'category' => 'nature',
+                'category' => DestinationCategory::Nature,
                 'tags' => ['mountain', 'nature', 'jijel', 'djimla'],
             ],
             [
@@ -316,7 +317,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Bordj T\'har',
                 'latitude' => 36.78659,
                 'longitude' => 6.03245,
-                'category' => 'nature',
+                'category' => DestinationCategory::Nature,
                 'tags' => ['mountain', 'nature', 'jijel', 'chekfa'],
             ],
             [
@@ -325,7 +326,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Djimla',
                 'latitude' => 36.5499,
                 'longitude' => 5.8452,
-                'category' => 'nature',
+                'category' => DestinationCategory::Nature,
                 'tags' => ['mountain_pass', 'nature', 'jijel', 'djimla'],
             ],
             [
@@ -334,7 +335,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'El Ancer',
                 'latitude' => 36.7860,
                 'longitude' => 5.9926,
-                'category' => 'nature',
+                'category' => DestinationCategory::Nature,
                 'tags' => ['waterfall', 'nature', 'jijel', 'el_ancer'],
             ],
             [
@@ -343,7 +344,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Ziama Mansouriah',
                 'latitude' => 36.673,
                 'longitude' => 5.481,
-                'category' => 'nature',
+                'category' => DestinationCategory::Nature,
                 'tags' => ['waterfall', 'nature', 'jijel', 'ziama_mansouriah'],
             ],
             [
@@ -352,7 +353,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Texenna',
                 'latitude' => 36.60317,
                 'longitude' => 5.71481,
-                'category' => 'nature',
+                'category' => DestinationCategory::Nature,
                 'tags' => ['waterfall', 'nature', 'jijel', 'texenna'],
             ],
             [
@@ -361,7 +362,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Texenna',
                 'latitude' => 36.6606,
                 'longitude' => 5.79098,
-                'category' => 'nature',
+                'category' => DestinationCategory::Nature,
                 'tags' => ['waterfall', 'nature', 'jijel', 'texenna'],
             ],
             [
@@ -370,7 +371,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Selma Ben Ziada',
                 'latitude' => 36.604145,
                 'longitude' => 5.660354,
-                'category' => 'nature',
+                'category' => DestinationCategory::Nature,
                 'tags' => ['spring', 'nature', 'jijel', 'selma_ben_ziada'],
             ],
             [
@@ -379,7 +380,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Ziama Mansouriah',
                 'latitude' => 36.6827,
                 'longitude' => 5.5183,
-                'category' => 'nature',
+                'category' => DestinationCategory::Nature,
                 'tags' => ['cave', 'nature', 'jijel', 'ziama_mansouriah'],
             ],
             [
@@ -388,7 +389,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Ziama Mansouriah',
                 'latitude' => 36.70053,
                 'longitude' => 5.5379,
-                'category' => 'nature',
+                'category' => DestinationCategory::Nature,
                 'tags' => ['cave', 'nature', 'prehistoric', 'jijel', 'ziama_mansouriah'],
             ],
             [
@@ -397,7 +398,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'El Aouana',
                 'latitude' => 36.79039,
                 'longitude' => 5.66319,
-                'category' => 'nature',
+                'category' => DestinationCategory::Nature,
                 'tags' => ['zoo', 'nature', 'jijel', 'el_aouana'],
             ],
             [
@@ -406,7 +407,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Ziama Mansouriah',
                 'latitude' => 36.6923,
                 'longitude' => 5.5863,
-                'category' => 'nature',
+                'category' => DestinationCategory::Nature,
                 'tags' => ['national_park', 'nature', 'unesco', 'jijel', 'ziama_mansouriah'],
             ],
             [
@@ -415,7 +416,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Beni Belaïd',
                 'latitude' => 36.8722,
                 'longitude' => 6.1026,
-                'category' => 'nature',
+                'category' => DestinationCategory::Nature,
                 'tags' => ['nature_reserve', 'lake', 'nature', 'jijel', 'beni_belaid'],
             ],
             [
@@ -424,7 +425,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Ben Yadjis',
                 'latitude' => 36.5658,
                 'longitude' => 5.7032,
-                'category' => 'nature',
+                'category' => DestinationCategory::Nature,
                 'tags' => ['lake', 'nature', 'jijel', 'ben_yadjis'],
             ],
             [
@@ -433,7 +434,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'El Aouana Centre',
                 'latitude' => 36.78541,
                 'longitude' => 5.60852,
-                'category' => 'nature',
+                'category' => DestinationCategory::Nature,
                 'tags' => ['island', 'nature', 'jijel', 'el_aouana'],
             ],
             [
@@ -442,7 +443,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Borj Blida (Andrew)',
                 'latitude' => 36.79472,
                 'longitude' => 5.55083,
-                'category' => 'nature',
+                'category' => DestinationCategory::Nature,
                 'tags' => ['island', 'nature', 'jijel', 'el_aouana'],
             ],
             [
@@ -451,7 +452,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Erraguene Souissi',
                 'latitude' => 36.58185,
                 'longitude' => 5.57677,
-                'category' => 'nature',
+                'category' => DestinationCategory::Nature,
                 'tags' => ['dam', 'nature', 'jijel', 'erraguene_souissi'],
             ],
             [
@@ -460,7 +461,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Jijel',
                 'latitude' => 36.82236,
                 'longitude' => 5.88833,
-                'category' => 'nature',
+                'category' => DestinationCategory::Nature,
                 'tags' => ['port', 'nature', 'jijel', 'jijel_centre'],
             ],
             [
@@ -469,7 +470,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'El Aouana Centre',
                 'latitude' => 36.77716,
                 'longitude' => 5.60435,
-                'category' => 'nature',
+                'category' => DestinationCategory::Nature,
                 'tags' => ['port', 'nature', 'jijel', 'el_aouana'],
             ],
             [
@@ -478,7 +479,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Ziama Mansouriah',
                 'latitude' => 36.67700,
                 'longitude' => 5.47929,
-                'category' => 'nature',
+                'category' => DestinationCategory::Nature,
                 'tags' => ['port', 'nature', 'jijel', 'ziama_mansouriah'],
             ],
 
@@ -489,7 +490,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Jijel',
                 'latitude' => 36.825159,
                 'longitude' => 5.767655,
-                'category' => 'historical',
+                'category' => DestinationCategory::Historical,
                 'tags' => ['statue', 'historical', 'jijel', 'jijel_centre'],
             ],
             [
@@ -498,7 +499,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Jijel',
                 'latitude' => 36.7989,
                 'longitude' => 5.7315,
-                'category' => 'historical',
+                'category' => DestinationCategory::Historical,
                 'tags' => ['lighthouse', 'historical', 'jijel', 'jijel_centre'],
             ],
             [
@@ -507,7 +508,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Jijel',
                 'latitude' => 36.8163,
                 'longitude' => 5.7712,
-                'category' => 'historical',
+                'category' => DestinationCategory::Historical,
                 'tags' => ['monument', 'historical', 'jijel', 'jijel_centre'],
             ],
             [
@@ -516,7 +517,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'El Rabta',
                 'latitude' => 36.81667,
                 'longitude' => 5.75,
-                'category' => 'historical',
+                'category' => DestinationCategory::Historical,
                 'tags' => ['cemetery', 'phoenician', 'historical', 'jijel'],
             ],
             [
@@ -525,7 +526,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Beaumarche',
                 'latitude' => 36.8247,
                 'longitude' => 5.7599,
-                'category' => 'historical',
+                'category' => DestinationCategory::Historical,
                 'tags' => ['wall', 'historical', 'jijel'],
             ],
             [
@@ -534,7 +535,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Jijel',
                 'latitude' => 36.8172,
                 'longitude' => 5.7667,
-                'category' => 'historical',
+                'category' => DestinationCategory::Historical,
                 'tags' => ['cemetery', 'historical', 'jijel', 'jijel_centre'],
             ],
             [
@@ -543,7 +544,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Ziama Mansouriah',
                 'latitude' => 36.6595,
                 'longitude' => 5.435,
-                'category' => 'historical',
+                'category' => DestinationCategory::Historical,
                 'tags' => ['archaeological', 'roman', 'historical', 'jijel', 'ziama_mansouriah'],
             ],
 
@@ -554,7 +555,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Djimla, ELMilia',
                 'latitude' => null,
                 'longitude' => null,
-                'category' => 'cultural',
+                'category' => DestinationCategory::Cultural,
                 'tags' => ['handicraft', 'woodworking', 'cultural', 'jijel'],
             ],
             [
@@ -563,7 +564,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Sidi Abdelaziz',
                 'latitude' => null,
                 'longitude' => null,
-                'category' => 'cultural',
+                'category' => DestinationCategory::Cultural,
                 'tags' => ['handicraft', 'leather', 'cultural', 'jijel'],
             ],
             [
@@ -572,7 +573,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'zones rurales',
                 'latitude' => null,
                 'longitude' => null,
-                'category' => 'cultural',
+                'category' => DestinationCategory::Cultural,
                 'tags' => ['handicraft', 'pottery', 'cultural', 'jijel'],
             ],
             [
@@ -581,7 +582,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Jijel',
                 'latitude' => null,
                 'longitude' => null,
-                'category' => 'cultural',
+                'category' => DestinationCategory::Cultural,
                 'tags' => ['handicraft', 'embroidery', 'traditional_clothing', 'cultural', 'jijel'],
             ],
             [
@@ -590,7 +591,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Jijel',
                 'latitude' => null,
                 'longitude' => null,
-                'category' => 'cultural',
+                'category' => DestinationCategory::Cultural,
                 'tags' => ['handicraft', 'decoration', 'cultural', 'jijel'],
             ],
             [
@@ -599,7 +600,7 @@ class DestinationSeeder extends Seeder
                 'address' => 'Jijel',
                 'latitude' => null,
                 'longitude' => null,
-                'category' => 'cultural',
+                'category' => DestinationCategory::Cultural,
                 'tags' => ['cuisine', 'gastronomy', 'cultural', 'jijel'],
             ],
         ];

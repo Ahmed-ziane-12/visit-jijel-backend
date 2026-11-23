@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests\Api;
 
+use App\Enums\ItineraryStatus;
+use App\Enums\ItineraryVisibility;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateItineraryRequest extends FormRequest
 {
@@ -18,8 +21,8 @@ class UpdateItineraryRequest extends FormRequest
             'notes' => ['nullable', 'string'],
             'start_date' => ['nullable', 'date'],
             'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
-            'visibility' => ['sometimes', 'in:private,public,shared'],
-            'status' => ['sometimes', 'in:draft,published'],
+            'visibility' => ['sometimes', Rule::enum(ItineraryVisibility::class)],
+            'status' => ['sometimes', Rule::enum(ItineraryStatus::class)],
             'preferences' => ['sometimes', 'array'],
         ];
     }

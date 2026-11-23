@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\UserRole;
 use App\Traits\HasMedia;
 use App\Traits\HasRole;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -22,6 +23,13 @@ class Profile extends Model
         'wilaya',
         'commune',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'role' => UserRole::class,
+        ];
+    }
 
     // ── Relationships ─────────────────────────────────────────
     public function user(): BelongsTo

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ItineraryItemType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -25,6 +26,13 @@ class ItineraryItem extends Model
 
     protected $appends = ['description', 'image_url', 'latitude', 'longitude'];
 
+    protected function casts(): array
+    {
+        return [
+            'item_type' => ItineraryItemType::class,
+        ];
+    }
+
     public function getDescriptionAttribute(): ?string
     {
         return $this->notes;
@@ -41,9 +49,9 @@ class ItineraryItem extends Model
     public function getLatitudeAttribute(): ?float
     {
         $latitude = match ($this->item_type) {
-            'destination' => $this->destination?->latitude,
-            'listing' => $this->listing?->business?->latitude,
-            'event' => $this->event?->latitude ?? $this->event?->business?->latitude,
+            ItineraryItemType::Destination => $this->destination?->latitude,
+            ItineraryItemType::Listing => $this->listing?->business?->latitude,
+            ItineraryItemType::Event => $this->event?->latitude ?? $this->event?->business?->latitude,
             default => null,
         };
 
@@ -53,9 +61,9 @@ class ItineraryItem extends Model
     public function getLongitudeAttribute(): ?float
     {
         $longitude = match ($this->item_type) {
-            'destination' => $this->destination?->longitude,
-            'listing' => $this->listing?->business?->longitude,
-            'event' => $this->event?->longitude ?? $this->event?->business?->longitude,
+            ItineraryItemType::Destination => $this->destination?->longitude,
+            ItineraryItemType::Listing => $this->listing?->business?->longitude,
+            ItineraryItemType::Event => $this->event?->longitude ?? $this->event?->business?->longitude,
             default => null,
         };
 

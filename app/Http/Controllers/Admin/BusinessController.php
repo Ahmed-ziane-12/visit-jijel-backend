@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\BusinessType;
 use App\Http\Controllers\Controller;
 use App\Models\Business;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class BusinessController extends Controller
 {
@@ -39,7 +41,7 @@ class BusinessController extends Controller
             'is_verified' => ['sometimes', 'boolean'],
             'is_active' => ['sometimes', 'boolean'],
             'name' => ['sometimes', 'string', 'max:150'],
-            'type' => ['sometimes', 'in:restaurant,touristic_agency,real_estate_agency,hotel'],
+            'type' => ['sometimes', Rule::enum(BusinessType::class)],
         ]);
 
         $changes = collect();

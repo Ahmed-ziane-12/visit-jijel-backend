@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\ItineraryStatus;
+use App\Enums\ItineraryVisibility;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -29,6 +31,8 @@ class Itinerary extends Model
             'start_date' => 'date',
             'end_date' => 'date',
             'preferences' => 'array',
+            'status' => ItineraryStatus::class,
+            'visibility' => ItineraryVisibility::class,
         ];
     }
 

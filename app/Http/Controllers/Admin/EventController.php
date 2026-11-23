@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\EventStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class EventController extends Controller
 {
@@ -31,7 +33,7 @@ class EventController extends Controller
     public function update(Request $request, Event $event): JsonResponse
     {
         $data = $request->validate([
-            'status' => ['required', 'in:draft,published,cancelled'],
+            'status' => ['required', Rule::enum(EventStatus::class)],
         ]);
 
         $original = $event->only('status');

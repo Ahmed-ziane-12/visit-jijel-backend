@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\DB;
@@ -12,6 +13,8 @@ class RegisterUser
     public function handle(array $data): User
     {
         return DB::transaction(function () use ($data) {
+            $role = UserRole::from($data['role']);
+
             $user = User::create([
                 'name' => $data['name'],
                 'email' => $data['email'],
@@ -19,12 +22,12 @@ class RegisterUser
             ]);
 
             $user->profile()->create([
-                'role' => $data['role'],
+                'role' => $role,
             ]);
 
             // Only fire the Registered event for business owners
             // This triggers Laravel's built-in verification email
-            if ($data['role'] === 'business_owner') {
+            if ($role === UserRole::BusinessOwner) {
                 event(new Registered($user));
             }
 

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\UserRole;
 use App\Models\Profile;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -20,7 +21,7 @@ class ProfileFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'role' => 'client',
+            'role' => UserRole::Client,
             'phone' => fake()->phoneNumber(),
             'bio' => fake()->sentence(),
             'wilaya' => 'Jijel',
@@ -30,11 +31,11 @@ class ProfileFactory extends Factory
 
     public function client(): static
     {
-        return $this->state(fn () => ['role' => 'client']);
+        return $this->state(fn () => ['role' => UserRole::Client]);
     }
 
     public function businessOwner(): static
     {
-        return $this->state(fn () => ['role' => 'business_owner']);
+        return $this->state(fn () => ['role' => UserRole::BusinessOwner]);
     }
 }

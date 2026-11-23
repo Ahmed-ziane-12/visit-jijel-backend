@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -42,7 +43,7 @@ class UserSeeder extends Seeder
 
             if ($user->wasRecentlyCreated) {
                 $user->profile()->create([
-                    'role' => 'business_owner',
+                    'role' => UserRole::BusinessOwner,
                     'phone' => '+213 5'.random_int(50, 99).' '.str_pad((string) random_int(10, 99), 2, '0', STR_PAD_LEFT).' '.str_pad((string) random_int(10, 99), 2, '0', STR_PAD_LEFT).' '.str_pad((string) random_int(10, 99), 2, '0', STR_PAD_LEFT),
                     'bio' => 'Business owner passionate about tourism in Jijel.',
                     'wilaya' => 'Jijel',
@@ -74,7 +75,7 @@ class UserSeeder extends Seeder
 
             if ($user->wasRecentlyCreated) {
                 $user->profile()->create([
-                    'role' => 'client',
+                    'role' => UserRole::Client,
                     'phone' => '+213 5'.random_int(50, 99).' '.str_pad((string) random_int(10, 99), 2, '0', STR_PAD_LEFT).' '.str_pad((string) random_int(10, 99), 2, '0', STR_PAD_LEFT).' '.str_pad((string) random_int(10, 99), 2, '0', STR_PAD_LEFT),
                     'bio' => 'Travel enthusiast exploring Algeria.',
                     'wilaya' => $data['wilaya'],

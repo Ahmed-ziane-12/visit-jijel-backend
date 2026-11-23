@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Auth;
 
 use App\Actions\RegisterUser;
+use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\ForgotPasswordRequest;
 use App\Http\Requests\Auth\LoginRequest;
@@ -37,14 +38,14 @@ class AuthController extends Controller
 
         // Clients get a session immediately so they can use the app;
         // business owners must verify first, so they are not auto-logged in.
-        if ($user->profile->role === 'client' && $isFrontend) {
+        if ($user->profile->role === UserRole::Client && $isFrontend) {
             Auth::login($user);
             $request->session()->regenerate();
         }
 
         // Web apps authenticate with session cookies; only non-stateful
         // clients (e.g. the mobile app) receive a bearer token.
-        $token = ! $isFrontend && $user->profile->role === 'client'
+        $token = ! $isFrontend && $user->profile->role === UserRole::Client
             ? $user->createToken('auth-token')->plainTextToken
             : null;
 
@@ -73,7 +74,7 @@ class AuthController extends Controller
         $role = $user->profile?->role;
 
         // Business owners must verify before they can do anything
-        if ($role === 'business_owner' && ! $user->hasVerifiedEmail()) {
+        if ($role === UserRole::BusinessOwner && ! $user->hasVerifiedEmail()) {
             Auth::logout();
 
             if ($isFrontend) {
@@ -99,7 +100,7 @@ class AuthController extends Controller
         // Next.js uses 'email_verified' to decide whether to show the alert
         return response()->json([
             'user' => $user,
-            'role' => $role,
+            'role' => $role?->value,
             'email_verified' => $user->hasVerifiedEmail(),
             'token' => $token,
         ]);

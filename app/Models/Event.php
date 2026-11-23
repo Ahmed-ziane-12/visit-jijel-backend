@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\EventStatus;
 use App\Traits\HasCoverImage;
 use App\Traits\HasLocation;
 use App\Traits\HasMedia;
@@ -49,6 +50,7 @@ class Event extends Model
             'price' => 'decimal:2',
             'latitude' => 'decimal:7',
             'longitude' => 'decimal:7',
+            'status' => EventStatus::class,
         ];
     }
 

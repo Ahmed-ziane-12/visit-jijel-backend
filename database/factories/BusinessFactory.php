@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\BusinessType;
 use App\Models\Business;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -20,7 +21,7 @@ class BusinessFactory extends Factory
     {
         return [
             'owner_id' => User::factory(),
-            'type' => fake()->randomElement(['restaurant', 'hotel', 'touristic_agency', 'real_estate_agency']),
+            'type' => fake()->randomElement(BusinessType::cases()),
             'name' => fake()->company(),
             'description' => fake()->paragraph(),
             'phone' => fake()->phoneNumber(),

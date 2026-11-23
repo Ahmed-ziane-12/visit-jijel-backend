@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\DestinationCategory;
+use App\Enums\DestinationState;
 use App\Traits\HasCoverImage;
 use App\Traits\HasLocation;
 use App\Traits\HasMedia;
@@ -47,6 +49,8 @@ class Destination extends Model
             'longitude' => 'decimal:7',
             'is_featured' => 'boolean',
             'tags' => 'array',
+            'category' => DestinationCategory::class,
+            'state' => DestinationState::class,
         ];
     }
 

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\EventStatus;
 use App\Models\Event;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -25,13 +26,13 @@ class EventFactory extends Factory
             'starts_at' => now()->addDays(fake()->numberBetween(1, 30)),
             'ends_at' => now()->addDays(fake()->numberBetween(31, 60)),
             'price' => fake()->randomFloat(2, 0, 200),
-            'status' => 'draft',
+            'status' => EventStatus::Draft,
             'max_attendees' => fake()->numberBetween(10, 200),
         ];
     }
 
     public function published(): static
     {
-        return $this->state(fn () => ['status' => 'published']);
+        return $this->state(fn () => ['status' => EventStatus::Published]);
     }
 }
