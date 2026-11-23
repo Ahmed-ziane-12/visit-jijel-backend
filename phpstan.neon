@@ -1,0 +1,18 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+    - phpstan-baseline.neon
+
+parameters:
+    level: 6
+
+    paths:
+        - app
+        - database
+        - routes
+
+    treatPhpDocTypesAsCertain: false
+
+    # The application relies on Laravel's runtime container bindings and
+    # dynamic Eloquent APIs; Larastan resolves the framework surface but
+    # application-specific magic stays out of scope for now.
+    checkModelProperties: false

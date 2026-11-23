@@ -23,17 +23,19 @@
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="BROADCAST_CONNECTION" value="null"/>
         <env name="CACHE_STORE" value="array"/>
-        <env name="DB_CONNECTION" value="pgsql"/>
+        <!-- force="false" keeps CI (and any explicit shell override) in charge
+             of the connection while local runs fall back to these values. -->
+        <env name="DB_CONNECTION" value="pgsql" force="false"/>
         <!-- DB_URL must be overridden too: the pgsql connection's `url` key is
              merged over the individual DB_* keys (ConfigurationUrlParser), so a
              DB_URL left over from .env would silently point the test suite at
              the real dev database and migrate:fresh would wipe it. -->
-        <env name="DB_URL" value="pgsql://ahmed:ahmed@127.0.0.1:5432/visitJijel_test"/>
-        <env name="DB_HOST" value="127.0.0.1"/>
-        <env name="DB_PORT" value="5432"/>
-        <env name="DB_DATABASE" value="visitJijel_test"/>
-        <env name="DB_USERNAME" value="ahmed"/>
-        <env name="DB_PASSWORD" value="ahmed"/>
+        <env name="DB_URL" value="pgsql://ahmed:ahmed@127.0.0.1:5432/visitJijel_test" force="false"/>
+        <env name="DB_HOST" value="127.0.0.1" force="false"/>
+        <env name="DB_PORT" value="5432" force="false"/>
+        <env name="DB_DATABASE" value="visitJijel_test" force="false"/>
+        <env name="DB_USERNAME" value="ahmed" force="false"/>
+        <env name="DB_PASSWORD" value="ahmed" force="false"/>
         <!-- Dummy Cloudinary credentials: the SDK validates the config in its
              constructor, so the media endpoints need syntactically valid
              values even though no request ever leaves the test suite. -->
